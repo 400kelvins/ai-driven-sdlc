@@ -2,7 +2,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { execFileSync, spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
-import { extractSummary, stripMarkdown } from '../../scripts/speak.mjs'
+import { extractSummary, highlightScript, stripMarkdown } from '../../scripts/speak.mjs'
 
 const SCRIPT = fileURLToPath(new URL('../../scripts/speak.mjs', import.meta.url))
 const PACK_FIXTURE = fileURLToPath(new URL('../fixtures/gate-pack.md', import.meta.url))
@@ -56,4 +56,14 @@ test('dry run prints the pack summary', () => {
 test('missing file exits non-zero', () => {
   const r = spawnSync(process.execPath, [SCRIPT, 'nope.md', '--dry-run'])
   assert.equal(r.status, 1)
+})
+
+test('highlight script runs say interactively from the temp file', () => {
+  const script = highlightScript('/var/folders/x/speak-abc/summary.txt')
+  assert.match(script, /say --interactive=smso -f '\/var\/folders\/x\/speak-abc\/summary.txt'/)
+  assert.match(script, /tell application "Terminal"/)
+})
+
+test('highlight script rejects unsafe paths', () => {
+  assert.throws(() => highlightScript("/tmp/a'; rm -rf ~; '"), /Unsafe/)
 })
