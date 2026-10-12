@@ -59,7 +59,7 @@ One owner (the presenter), one deck, one repo. Not a Keynote product for other s
 - Decision: one epic — one owner, one deck, one deploy target (2026-10-12).
 - Decision: FR-10–FR-13 (voice capture, Stories, spec-kit, agent tests) are the process that builds this epic, not deck code; they are exercised by every entry rather than covered by one (2026-10-12).
 - Open question: which agent tests Stories and reviews diffs (PRD §8 Q1).
-- Decision: tracer bullet is entry 1 (local scaffold); it does not reach Vercel, following FR-7 local-first (2026-10-12).
+- Decision: tracer bullet is entry 1 (local scaffold); verified locally first (FR-7), then an early Vercel preview deploy to de-risk hosting (2026-10-12).
 - Decision: one file per deck section via Slidev `src:` imports so parallel entries never edit the same file (2026-10-12).
 - Assumption: the refactor sweep (entry 10) may be dropped if the deadline is at risk; the retrospective (entry 9) excludes it.
 - Decision: Gate 1 approved by presenter — 10 Stories, early Vercel deploy after entry 1 (2026-10-12).

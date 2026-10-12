@@ -1,50 +1,66 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+Sync Impact Report
+- Version change: (template) → 1.0.0
+- Modified principles: all placeholders replaced (initial ratification)
+- Added sections: Core Principles I–VI, Stage Constraints, Development Workflow & Gates, Governance
+- Removed sections: none
+- Deferred TODOs: none
+-->
+# AI-Driven SDLC Deck Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. No Hand-Written Code (NON-NEGOTIABLE)
+All application code, configuration, and content files in this repository MUST be produced by AI
+agents. The human MAY speak or type intent, answer questions, and approve or reject at Gates, but
+MUST NOT author code by hand. Rationale: the talk claims an AI-built product; the repo is the proof.
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### II. Spec Is the Living Source of Truth
+Every change MUST trace to a BMad Story in
+`_bmad-output/initiative-ai-driven-sdlc/epic-keynote-deck/tickets.toml` and, where coded, to a
+spec-kit feature spec under `specs/`. Code that contradicts its spec MUST be fixed or the spec
+amended first. Rationale: traceability is what the behind-the-scenes slides show.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### III. Humans at the Gates
+Each Story MUST end with a Gate Review Pack: a short summary, a table, a diagram, and an optional
+read-aloud. The human answers yes or no. Yes advances the Story; no returns the work to Discovery.
+Rationale: humans decide best by reading, listening, and seeing, not by scanning diffs.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### IV. Local-First, Then Deploy
+Every change MUST pass `npm run build` and play correctly under `npm run dev` before any Vercel
+deploy. After each deploy, the agent MUST read the deployment logs and report health in a Gate
+Review Pack. No continuous AI log monitoring. Rationale: stage safety and token cost.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### V. Simplicity Under Deadline
+The talk is on 2026-10-14. Slidev built-ins MUST be preferred over custom code; custom components
+are allowed only where a built-in cannot meet a requirement, and the reason MUST be stated in the
+plan. Each deck section lives in its own file (Slidev `src:` imports) so parallel Stories never
+edit the same file. Rationale: finish on time; avoid merge collisions.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+### VI. Offline-Safe on Stage
+Slides and the demo video MUST work with no network at runtime: assets bundled locally, no CDN
+fonts or scripts required to render. Rationale: venue Wi-Fi is unreliable.
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+## Stage Constraints
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+- Stack: Slidev (Vue/Vite), Node 22, npm. Hosting: Vercel (static build).
+- Presenter flow: arrow-key navigation; Presenter View with notes, clocks, 20-minute countdown.
+- Media: demo video is one compressed MP4 under 3 minutes in `public/demo/`.
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+## Development Workflow & Gates
+
+1. Discovery by voice (Wispr Flow) → BMad Story.
+2. spec-kit: specify → plan → tasks → implement per Story.
+3. AI agent tests the Story against its verify line.
+4. AI code review; findings summarized and read aloud.
+5. Gate Review Pack → human yes/no.
+6. Local verification → Vercel deploy → deploy-log check.
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+This constitution supersedes other practices in this repo. Amendments are made through
+`/speckit-constitution`, recorded with a version bump (MAJOR: principle removed or redefined;
+MINOR: principle or section added; PATCH: wording). Every plan's Constitution Check MUST confirm
+Principles I–VI; any deviation MUST be justified in the plan's Complexity Tracking.
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Version**: 1.0.0 | **Ratified**: 2026-10-12 | **Last Amended**: 2026-10-12
