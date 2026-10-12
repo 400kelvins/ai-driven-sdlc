@@ -13,22 +13,24 @@ import { pathToFileURL } from 'node:url'
 
 export const LEDGER = '_bmad-output/initiative-ai-driven-sdlc/epic-keynote-deck/gates.jsonl'
 export const STAGES = ['plan', 'implement', 'review']
-// Docs and gate artifacts change after a decision; they are not the code being approved.
-const isCode = (path) => !/^(_bmad-output|specs)\//.test(path) && !path.endsWith('.md')
-const EXCLUDE = [':(exclude)_bmad-output', ':(exclude)specs', ':(exclude,glob)**/*.md']
+// Everything that ships is covered: code, config, and the deck's slides (slides.md, pages/*.md).
+// Planning docs and gate artifacts change after a decision and are not what ships.
+const DOCS_ONLY = /^(_bmad-output|_bmad|specs|\.specify|\.claude|\.agents)\//
+export const isCode = (path) =>
+  !DOCS_ONLY.test(path) && (!path.endsWith('.md') || path === 'slides.md' || path.startsWith('pages/'))
 
 const git = (...args) => execFileSync('git', args, { encoding: 'utf8' })
+const lines = (out) => out.split('\n').filter(Boolean)
 
-/** Hash of every tracked code file in HEAD plus any uncommitted code changes. */
+/** Hash of every shipped file in HEAD plus any uncommitted or new changes to them. */
 export function fingerprint() {
-  const tree = git('ls-tree', '-r', 'HEAD')
-    .split('\n')
-    .filter((line) => line && isCode(line.split('\t')[1]))
-    .join('\n')
-  const dirty = git('diff', 'HEAD', '--', '.', ...EXCLUDE)
-  const hash = createHash('sha256').update(tree).update(dirty)
-  // New files not yet committed count as code changes too
-  for (const path of git('ls-files', '--others', '--exclude-standard').split('\n').filter((p) => p && isCode(p))) {
+  const hash = createHash('sha256')
+  for (const line of lines(git('ls-tree', '-r', 'HEAD'))) {
+    if (isCode(line.split('\t')[1])) hash.update(line + '\n')
+  }
+  const changed = lines(git('diff', 'HEAD', '--name-only')).filter(isCode)
+  if (changed.length) hash.update(git('diff', 'HEAD', '--', ...changed))
+  for (const path of lines(git('ls-files', '--others', '--exclude-standard')).filter(isCode)) {
     hash.update(path).update(readFileSync(path))
   }
   return hash.digest('hex').slice(0, 16)

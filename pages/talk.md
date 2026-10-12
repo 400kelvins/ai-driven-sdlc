@@ -49,7 +49,7 @@ The spec is the source of truth. AI is embedded at planning, design, code, revie
 
 Even the prompts are AI-assisted: I speak with Wispr Flow instead of typing.
 
-Humans sit at three gates. Point at the amber boxes: the plan gate before any code, the code gate after implementation and tests, and the review gate after the AI code review.
+Humans sit at three gates in the build. Point at the amber boxes: the plan gate before any code, the code gate after implementation and tests, and the review gate after the AI code review.
 -->
 
 ---
@@ -87,9 +87,9 @@ Here's the actual pipeline.
 
 I speak into Wispr Flow. BMad turns it into a PRD and Stories. spec-kit turns each Story into a spec, a plan, and tasks. Claude Code implements. Playwright tests it. Another AI agent reviews the code and reads its findings aloud.
 
-spec-kit itself stops at three gates. Before implement: the plan gate. After implement: the code gate, with test results. After the AI review: the review gate. Each one is a Gate Review Pack, read aloud.
+spec-kit is set up to stop at three gates. Before implement: the plan gate. After implement: the code gate, with test results. After the AI review: the review gate. Each one is a Gate Review Pack, read aloud.
 
-Yes at the review gate is the only way to Vercel. No at any gate goes back to discovery.
+Our ship command deploys only after a review yes. No at any gate goes back to discovery.
 -->
 
 ---
@@ -106,7 +106,7 @@ Yes at the review gate is the only way to Vercel. No at any gate goes back to di
 | Code | Claude Code | — |
 | Test | Playwright, run by the agent | **Code gate**: what was built + tests |
 | Review | AI code review, read aloud | **Review gate**: the exact code |
-| Deploy + logs | Vercel CLI | Blocked without a review yes |
+| Deploy + logs | Vercel CLI | `npm run ship` needs a review yes |
 | Retro | AI from git and usage | Agree the lessons |
 
 </div>
@@ -116,7 +116,7 @@ Yes at the review gate is the only way to Vercel. No at any gate goes back to di
 <!--
 One tool per stage, all of it works with a Claude subscription.
 
-Notice the right column. The human doesn't disappear. The human moves to the gates: plan, code, and review.
+Notice the right column. The human doesn't disappear. The human moves to decision points: the Stories, the scope, three gates in the build, plan, code, and review, and the lessons at the end.
 -->
 
 ---
@@ -154,28 +154,29 @@ Then I say yes or no. No sends the work back to discovery, not to a bug ticket.
 
 ---
 
-# Gates you can't skip
+# Gates with teeth
 
 <div class="grid grid-cols-3 gap-6 mt-8 text-center">
-  <div class="p-5 rounded-lg border-2 border-amber-500 bg-amber-500/15"><div class="text-xl font-bold">Plan gate</div><div class="op-70 mt-2">before any code</div></div>
-  <div class="p-5 rounded-lg border-2 border-amber-500 bg-amber-500/15"><div class="text-xl font-bold">Code gate</div><div class="op-70 mt-2">what was built + tests</div></div>
-  <div class="p-5 rounded-lg border-2 border-amber-500 bg-amber-500/15"><div class="text-xl font-bold">Review gate</div><div class="op-70 mt-2">the exact reviewed code</div></div>
+  <div class="p-5 rounded-lg border-2 border-amber-500/60 bg-amber-500/5"><div class="text-xl font-bold">Plan gate</div><div class="op-70 mt-2">before any code</div><div class="text-sm mt-3 op-60">spec-kit prompts</div></div>
+  <div class="p-5 rounded-lg border-2 border-amber-500/60 bg-amber-500/5"><div class="text-xl font-bold">Code gate</div><div class="op-70 mt-2">what was built + tests</div><div class="text-sm mt-3 op-60">spec-kit prompts</div></div>
+  <div class="p-5 rounded-lg border-2 border-amber-500 bg-amber-500/15"><div class="text-xl font-bold">Review gate</div><div class="op-70 mt-2">the exact reviewed code</div><div class="text-sm mt-3 font-bold">enforced at ship</div></div>
 </div>
 
-<div class="mt-8 text-lg">My yes is recorded with a fingerprint of the code. Change one line, and shipping stops:</div>
+<div class="mt-8 text-lg">My review yes is recorded with a fingerprint of everything that ships, code and slides. Change one line, and <code>npm run ship</code> stops:</div>
 
 ```text
+# example output
 $ npm run ship
-Human gate not passed: code changed since the review gate was approved (approved 5ff754143151a793, now 9c1e07b2d4a86f30).
+Human gate not passed: code changed since the review gate was approved (approved 5ff7…, now 9c1e…).
 Run /speckit-gate-review and answer yes before shipping.
 ```
 
 <!--
-Gates only matter if you can't walk around them.
+Be honest about which gates have teeth.
 
-spec-kit stops at three gates on its own. My answer is written to a ledger with a fingerprint of the exact code I approved.
+The plan and code gates are prompts: spec-kit tells the agent to stop and ask me. The review gate is enforced: my answer goes into a ledger with a fingerprint of everything that ships, code and slides.
 
-If anyone, human or AI, changes the code after my yes, the deploy command refuses to ship. The AI is also not allowed to answer the gate for me.
+If anyone, human or AI, changes a shipped file after my yes, our ship command refuses to deploy. Someone could still call Vercel directly, and the AI is instructed, not prevented, from answering for me. The ledger makes any of that visible in review. Next step: enforce it in CI too.
 -->
 
 ---
