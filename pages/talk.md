@@ -37,7 +37,7 @@ AI shows up only as autocomplete inside the code box.
 The spec is the living source of truth
 
 <div class="mt-10">
-<Flow :steps="['🎙 Voice', 'Spec', { label: 'Gate', kind: 'gate' }, 'Plan and tasks', 'AI code', 'AI tests', 'AI review', { label: 'Gate', kind: 'gate' }, 'AI deploy', 'AI log check', { label: 'Gate', kind: 'gate' }, 'AI retro']" />
+<Flow :steps="['🎙 Voice', 'Spec', 'Plan and tasks', { label: 'Plan gate', kind: 'gate' }, 'AI code', 'AI tests', { label: 'Code gate', kind: 'gate' }, 'AI review', { label: 'Review gate', kind: 'gate' }, 'AI deploy', 'AI log check', 'AI retro']" />
 </div>
 
 <div class="mt-8 op-70">Humans sit at decision points, not at every keystroke.</div>
@@ -49,7 +49,7 @@ The spec is the source of truth. AI is embedded at planning, design, code, revie
 
 Even the prompts are AI-assisted: I speak with Wispr Flow instead of typing.
 
-Humans sit at the gates. Point at the amber boxes.
+Humans sit at three gates. Point at the amber boxes: the plan gate before any code, the code gate after implementation and tests, and the review gate after the AI code review.
 -->
 
 ---
@@ -77,7 +77,7 @@ So every stage of this lifecycle reports back in those three forms. That's what 
 # The pipeline behind this deck
 
 <div class="mt-10">
-<Flow :steps="['🎙 Wispr Flow', 'BMad<br/><small>PRD and Stories</small>', 'spec-kit<br/><small>spec · plan · tasks</small>', 'Claude Code<br/><small>implement</small>', 'Playwright<br/><small>agent tests</small>', 'AI review<br/><small>read aloud</small>', { label: 'Gate Review Pack', kind: 'gate' }, 'Vercel<br/><small>deploy + logs</small>']" />
+<Flow :steps="['🎙 Wispr Flow', 'BMad<br/><small>PRD and Stories</small>', 'spec-kit<br/><small>spec · plan · tasks</small>', { label: 'Plan gate', kind: 'gate' }, 'Claude Code<br/><small>implement</small>', 'Playwright<br/><small>agent tests</small>', { label: 'Code gate', kind: 'gate' }, 'AI review<br/><small>read aloud</small>', { label: 'Review gate', kind: 'gate' }, 'Vercel<br/><small>deploy + logs</small>']" />
 </div>
 
 <div class="mt-6 op-70">No at the gate → back to Wispr Flow and discovery.</div>
@@ -87,7 +87,9 @@ Here's the actual pipeline.
 
 I speak into Wispr Flow. BMad turns it into a PRD and Stories. spec-kit turns each Story into a spec, a plan, and tasks. Claude Code implements. Playwright tests it. Another AI agent reviews the code and reads its findings aloud.
 
-Everything lands in a Gate Review Pack. Yes ships to Vercel and checks the logs. No goes back to discovery.
+spec-kit itself stops at three gates. Before implement: the plan gate. After implement: the code gate, with test results. After the AI review: the review gate. Each one is a Gate Review Pack, read aloud.
+
+Yes at the review gate is the only way to Vercel. No at any gate goes back to discovery.
 -->
 
 ---
@@ -100,11 +102,11 @@ Everything lands in a Gate Review Pack. Yes ships to Vercel and checks the logs.
 |---|---|---|
 | Requirements | Wispr Flow + BMad PRD | Approve the Stories |
 | Estimation | AI: hours · points · tokens · $ | Accept the scope |
-| Spec | GitHub spec-kit | — |
+| Spec | GitHub spec-kit | **Plan gate**: spec, plan, tasks |
 | Code | Claude Code | — |
-| Test | Playwright, run by the agent | — |
-| Review | AI code review, read aloud | Approve the Gate Review Pack |
-| Deploy + logs | Vercel CLI | Approve the release |
+| Test | Playwright, run by the agent | **Code gate**: what was built + tests |
+| Review | AI code review, read aloud | **Review gate**: the exact code |
+| Deploy + logs | Vercel CLI | Blocked without a review yes |
 | Retro | AI from git and usage | Agree the lessons |
 
 </div>
@@ -114,7 +116,7 @@ Everything lands in a Gate Review Pack. Yes ships to Vercel and checks the logs.
 <!--
 One tool per stage, all of it works with a Claude subscription.
 
-Notice the right column. The human doesn't disappear. The human moves to the gates.
+Notice the right column. The human doesn't disappear. The human moves to the gates: plan, code, and review.
 -->
 
 ---
@@ -148,6 +150,32 @@ This is the artifact that replaces reading diffs.
 Every Story ends with one. I can read it in a minute or listen to it while I make coffee.
 
 Then I say yes or no. No sends the work back to discovery, not to a bug ticket.
+-->
+
+---
+
+# Gates you can't skip
+
+<div class="grid grid-cols-3 gap-6 mt-8 text-center">
+  <div class="p-5 rounded-lg border-2 border-amber-500 bg-amber-500/15"><div class="text-xl font-bold">Plan gate</div><div class="op-70 mt-2">before any code</div></div>
+  <div class="p-5 rounded-lg border-2 border-amber-500 bg-amber-500/15"><div class="text-xl font-bold">Code gate</div><div class="op-70 mt-2">what was built + tests</div></div>
+  <div class="p-5 rounded-lg border-2 border-amber-500 bg-amber-500/15"><div class="text-xl font-bold">Review gate</div><div class="op-70 mt-2">the exact reviewed code</div></div>
+</div>
+
+<div class="mt-8 text-lg">My yes is recorded with a fingerprint of the code. Change one line, and shipping stops:</div>
+
+```text
+$ npm run ship
+Human gate not passed: code changed since the review gate was approved (approved 5ff754143151a793, now 9c1e07b2d4a86f30).
+Run /speckit-gate-review and answer yes before shipping.
+```
+
+<!--
+Gates only matter if you can't walk around them.
+
+spec-kit stops at three gates on its own. My answer is written to a ledger with a fingerprint of the exact code I approved.
+
+If anyone, human or AI, changes the code after my yes, the deploy command refuses to ship. The AI is also not allowed to answer the gate for me.
 -->
 
 ---
@@ -241,14 +269,14 @@ That's exactly why the gate matters, and why it has to be readable, listenable, 
 
 1. **Speak** your next requirement instead of typing it
 2. **Spec first**: one spec per Story, kept as the source of truth
-3. **One gate per Story** with a summary, a table, and a diagram
+3. **Three gates per Story**: plan, code, review, each with a summary, a table, and a diagram
 4. **Let AI review**, and listen to the findings
 5. **Measure** estimate vs actual, tokens and dollars included
 
 <!--
 You don't need the whole pipeline on day one.
 
-Pick one Story next week. Speak it, spec it, give it one gate with a summary, a table, and a diagram. Measure it. The repo for this deck is public, so copy what you need.
+Pick one Story next week. Speak it, spec it, and stop it at three gates: plan, code, and review, each with a summary, a table, and a diagram. Measure it. The repo for this deck is public, so copy what you need.
 -->
 
 ---
