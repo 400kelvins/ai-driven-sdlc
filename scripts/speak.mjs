@@ -26,7 +26,8 @@ export function stripMarkdown(text) {
     .replace(/^\s*[-*+]\s+/gm, '')
     .replace(/^\s*\|?[-:\s|]+\|?\s*$/gm, '')
     .replace(/\|/g, ' ')
-    .replace(/(\*\*|__|\*|_|~~)(.*?)\1/g, '$2')
+    .replace(/(?<!\w)(\*\*|__|\*|_|~~)(?=\S)(.+?)(?<=\S)\1(?!\w)/g, '$2')
+    .replace(/\[\[|\]\]/g, ' ')
     .replace(/[ \t]+/g, ' ')
     .replace(/\s*\n\s*/g, ' ')
     .trim()
@@ -56,7 +57,14 @@ function main(argv) {
     console.log(text)
     return 0
   }
-  spawn('say', [text], { stdio: 'inherit' }).on('exit', (code) => process.exit(code ?? 0))
+  // Text goes in on stdin, never argv, so it cannot be parsed as a `say` option
+  const say = spawn('say', ['-f', '-'], { stdio: ['pipe', 'inherit', 'inherit'] })
+  say.on('error', (err) => {
+    console.error(`Could not run say: ${err.message}`)
+    process.exit(1)
+  })
+  say.on('exit', (code, signal) => process.exit(signal ? 1 : (code ?? 1)))
+  say.stdin.end(text)
   return null
 }
 

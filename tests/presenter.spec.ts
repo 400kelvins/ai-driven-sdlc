@@ -5,7 +5,8 @@ test('presenter view shows notes, next slide, 20:00 countdown, and clock', async
   await expect(page.getByText('who still writes requirements docs by hand')).toBeVisible()
   // Next-slide preview renders the second section's title
   await expect(page.getByRole('heading', { level: 1, name: 'The AI-Driven SDLC' }).first()).toBeAttached()
-  await expect(page.getByText(/^20$/).first()).toBeVisible()
+  // Slidev's presenter timer (TimerInlined): countdown starts at 20:00
+  await expect(page.locator('.text-3xl.font-mono').filter({ hasText: /^\s*20\s*:\s*00\s*$/ })).toBeVisible()
   await expect(page.getByTestId('presenter-clock')).toHaveText(/\d{1,2}:\d{2}/)
 })
 

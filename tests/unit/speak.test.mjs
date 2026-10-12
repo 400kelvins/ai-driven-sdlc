@@ -1,7 +1,11 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { execFileSync, spawnSync } from 'node:child_process'
+import { fileURLToPath } from 'node:url'
 import { extractSummary, stripMarkdown } from '../../scripts/speak.mjs'
+
+const SCRIPT = fileURLToPath(new URL('../../scripts/speak.mjs', import.meta.url))
+const PACK_FIXTURE = fileURLToPath(new URL('../fixtures/gate-pack.md', import.meta.url))
 
 const PACK = `# Pack
 
@@ -34,17 +38,22 @@ test('strips markdown symbols', () => {
   assert.doesNotMatch(text, /[#*`|]/)
 })
 
-test('dry run prints the Story 1 pack summary', () => {
-  const out = execFileSync('node', [
-    'scripts/speak.mjs',
-    '_bmad-output/initiative-ai-driven-sdlc/epic-keynote-deck/story-1-gate-review.md',
-    '--dry-run',
-  ]).toString()
+test('keeps intraword underscores and spaced asterisks', () => {
+  assert.equal(stripMarkdown('snake_case_name and 5 * 3 * 2'), 'snake_case_name and 5 * 3 * 2')
+  assert.equal(stripMarkdown('_em_ and __strong__'), 'em and strong')
+})
+
+test('removes say embedded commands', () => {
+  assert.doesNotMatch(stripMarkdown('hello [[rate 500]] world'), /\[\[|\]\]/)
+})
+
+test('dry run prints the pack summary', () => {
+  const out = execFileSync(process.execPath, [SCRIPT, PACK_FIXTURE, '--dry-run']).toString()
   assert.match(out, /Story one is built/)
   assert.doesNotMatch(out, /[#*`|]/)
 })
 
 test('missing file exits non-zero', () => {
-  const r = spawnSync('node', ['scripts/speak.mjs', 'nope.md', '--dry-run'])
+  const r = spawnSync(process.execPath, [SCRIPT, 'nope.md', '--dry-run'])
   assert.equal(r.status, 1)
 })

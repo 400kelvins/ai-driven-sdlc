@@ -30,3 +30,24 @@ test('M on the monitoring slide without an origin stays put', async ({ page }) =
   await page.keyboard.press('ArrowRight')
   await onSlide(page, 5)
 })
+
+test('manual navigation clears the return point', async ({ page }) => {
+  await page.goto('/2')
+  await onSlide(page, 2)
+  await page.keyboard.press('m')
+  await onSlide(page, 4)
+  await page.keyboard.press('ArrowRight')
+  await onSlide(page, 5)
+  await page.keyboard.press('ArrowLeft')
+  await onSlide(page, 4)
+  // Arrived by arrows, not by M: M must not jump back to slide 2
+  await page.keyboard.press('m')
+  await onSlide(page, 4)
+})
+
+test('Cmd+M does not toggle monitoring', async ({ page }) => {
+  await page.goto('/2')
+  await onSlide(page, 2)
+  await page.keyboard.press('Meta+m')
+  await onSlide(page, 2)
+})
