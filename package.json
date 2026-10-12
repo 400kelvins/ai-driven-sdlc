@@ -10,7 +10,9 @@
     "review:speak": "node scripts/speak.mjs",
     "check:notes": "node scripts/check-notes-leak.mjs",
     "verify": "npm run test:unit && npm test && npm run build && npm run check:notes",
-    "ship": "npm run verify && npx vercel --prod --yes"
+    "ship": "npm run verify && npm run gate:check && npx vercel --prod --yes",
+    "gate:record": "node scripts/gate.mjs record",
+    "gate:check": "node scripts/gate.mjs check --stage review"
   },
   "dependencies": {
     "@slidev/cli": "53.0.0",

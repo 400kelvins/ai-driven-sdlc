@@ -1,0 +1,23 @@
+# Human gates around spec-kit implementation (Constitution III).
+# spec-kit skills read these hooks; `optional: false` means the agent must run them and wait.
+hooks:
+  before_implement:
+    - extension: human-gates
+      command: speckit.gate.plan
+      description: Human plan gate before any code is written
+      prompt: Approve the spec, plan, and tasks?
+      optional: false
+      enabled: true
+  after_implement:
+    - extension: human-gates
+      command: speckit.gate.implement
+      description: Human implementation gate with test results
+      prompt: Approve what was implemented?
+      optional: false
+      enabled: true
+    - extension: human-gates
+      command: speckit.gate.review
+      description: Human code review gate; approval is tied to the exact code and checked by npm run ship
+      prompt: Approve the reviewed code for shipping?
+      optional: false
+      enabled: true
