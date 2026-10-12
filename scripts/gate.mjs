@@ -86,7 +86,7 @@ function main(argv) {
   if (cmd === 'check') {
     const stage = args.stage ?? 'review'
     const result = approved(readLedger(), stage, fingerprint())
-    if (!result.ok) return fail(`Human gate not passed: ${result.reason}.\nRun the ${stage} gate (/speckit-gate ${stage}) and answer yes before shipping.`)
+    if (!result.ok) return fail(`Human gate not passed: ${result.reason}.\nRun /speckit-gate-${stage} and answer yes before shipping.`)
     console.log(`Human ${stage} gate passed: story ${result.entry.story}, approved ${result.entry.at}`)
     return 0
   }
