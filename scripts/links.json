@@ -1,0 +1,10 @@
+{
+  "deck": {
+    "label": "Live deck",
+    "url": "https://ai-driven-sdlc.vercel.app"
+  },
+  "repo": {
+    "label": "Blueprint repo",
+    "url": "https://github.com/400kelvins/ai-driven-sdlc"
+  }
+}

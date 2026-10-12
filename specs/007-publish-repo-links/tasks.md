@@ -5,36 +5,36 @@
 
 ## Phase 1: Setup
 
-- [ ] T001 Add dev dependencies `qrcode@1.5.4`, `jsqr@1.4.0`, `pngjs@7.0.0` and script `qr` (`node scripts/make-qr.mjs`) in package.json
+- [X] T001 Add dev dependencies `qrcode@1.5.4`, `jsqr@1.4.0`, `pngjs@7.0.0` and script `qr` (`node scripts/make-qr.mjs`) in package.json
 
 ## Phase 2: Foundational
 
-- [ ] T002 Create the single source of link URLs (`deck`, `repo` per contracts/links.md) in scripts/links.json
+- [X] T002 Create the single source of link URLs (`deck`, `repo` per contracts/links.md) in scripts/links.json
 
 ## Phase 3: User Story 1 — Scan and open (P1) 🎯 MVP
 
 **Goal**: Links slide shows two scannable codes offline.
 **Independent Test**: `tests/links.spec.ts` decodes both codes from the rendered slide.
 
-- [ ] T003 [P] [US1] Write unit test: generator produces SVG for each link in scripts/links.json, in tests/unit/make-qr.test.mjs
-- [ ] T004 [P] [US1] Write e2e test: on "Try It Yourself", screenshot each QR, decode with pngjs + jsQR, assert URL equals scripts/links.json; offline enforced, in tests/links.spec.ts
-- [ ] T005 [US1] Implement generator writing `public/qr/<id>.svg` (error correction M, margin 2) in scripts/make-qr.mjs
-- [ ] T006 [US1] Run `npm run qr`; commit public/qr/deck.svg and public/qr/repo.svg
-- [ ] T007 [US1] Build Links slide: title "Try It Yourself", two QR images (≥ quarter slide height) with labels and addresses, speaker notes, in pages/links.md
+- [X] T003 [P] [US1] Write unit test: generator produces SVG for each link in scripts/links.json, in tests/unit/make-qr.test.mjs
+- [X] T004 [P] [US1] Write e2e test: on "Try It Yourself", screenshot each QR, decode with pngjs + jsQR, assert URL equals scripts/links.json; offline enforced, in tests/links.spec.ts
+- [X] T005 [US1] Implement generator writing `public/qr/<id>.svg` (error correction M, margin 2) in scripts/make-qr.mjs
+- [X] T006 [US1] Run `npm run qr`; commit public/qr/deck.svg and public/qr/repo.svg
+- [X] T007 [US1] Build Links slide: title "Try It Yourself", two QR images (≥ quarter slide height) with labels and addresses, speaker notes, in pages/links.md
 
 ## Phase 4: User Story 2 — Copy the process (P1)
 
 **Goal**: Front page explains the blueprint and links every artifact.
 **Independent Test**: README links resolve to existing files.
 
-- [ ] T008 [P] [US2] Write README with pitch, lifecycle diagram, three gates, artifact map (PRD, Stories, specs, gate packs, gates.jsonl), run/verify/ship commands, in README.md
-- [ ] T009 [P] [US2] Add Apache-2.0 license (copyright 400kelvins) in LICENSE
-- [ ] T010 [US2] Write unit test: every relative link in README.md points to an existing path, in tests/unit/readme-links.test.mjs
+- [X] T008 [P] [US2] Write README with pitch, lifecycle diagram, three gates, artifact map (PRD, Stories, specs, gate packs, gates.jsonl), run/verify/ship commands, in README.md
+- [X] T009 [P] [US2] Add Apache-2.0 license (copyright 400kelvins) in LICENSE
+- [X] T010 [US2] Write unit test: every relative link in README.md points to an existing path, in tests/unit/readme-links.test.mjs
 
 ## Phase 5: User Story 3 — Nothing private (P1)
 
-- [ ] T011 [US3] Add secret/email scan of `main` history (personal email, token patterns) as `npm run check:public` in scripts/check-public.mjs and package.json
-- [ ] T012 [US3] Run `npm run verify` and `npm run check:public`; both pass
+- [X] T011 [US3] Add secret/email scan of `main` history (personal email, token patterns) as `npm run check:public` in scripts/check-public.mjs and package.json
+- [X] T012 [US3] Run `npm run verify` and `npm run check:public`; both pass
 
 ## Phase 6: Gates and publish (irreversible steps last)
 
