@@ -110,3 +110,15 @@ covers = []
 after = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 hitl = false
 risk = "low"
+
+[[entry]]
+id = 11
+type = "story"
+title = "PR workflow: AI review on every PR, CI human-gate check, branch protection"
+description = "Every next feature arrives as a pull request: CI runs npm run verify and npm run gate:check, the Claude GitHub Action reviews the PR, branch protection on main requires both checks, and /speckit-gate-review includes the PR's AI review."
+verify = "A PR cannot merge until CI is green and a review-gate yes covers its exact code; the AI review comment appears on the PR."
+covers = []
+after = [7]
+hitl = true
+risk = "medium"
+notes = ["Approved at Story 7 review gate, 2026-10-12: yes, after publish"]

@@ -38,9 +38,9 @@
 
 ## Phase 6: Gates and publish (irreversible steps last)
 
-- [ ] T013 Code gate (after_implement hook) → AI review → review gate (human yes required)
-- [ ] T014 [US2] After review yes: `gh repo create 400kelvins/ai-driven-sdlc --public --source . --remote origin`; `git push -u origin main` (main only); verify signed-out visibility
-- [ ] T015 [US4] `npm run ship`; `npx vercel inspect <url> --logs`; write deploy Gate Review Pack in _bmad-output/initiative-ai-driven-sdlc/epic-keynote-deck/gates/007-publish-repo-links-deploy.md
+- [X] T013 Code gate (after_implement hook) → AI review → review gate (human yes required)
+- [X] T014 [US2] After review yes: `gh repo create 400kelvins/ai-driven-sdlc --public --source . --remote origin`; `git push -u origin main` (main only); verify signed-out visibility
+- [X] T015 [US4] `npm run ship`; `npx vercel inspect <url> --logs`; write deploy Gate Review Pack in _bmad-output/initiative-ai-driven-sdlc/epic-keynote-deck/gates/007-publish-repo-links-deploy.md
 
 ## Dependencies
 
