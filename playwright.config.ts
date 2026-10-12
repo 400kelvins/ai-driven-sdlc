@@ -4,6 +4,9 @@ export default defineConfig({
   testDir: 'tests',
   testMatch: '**/*.spec.ts',
   timeout: 60_000,
+  // Slidev dev server syncs navigation across all open pages; run serially
+  workers: 1,
+  fullyParallel: false,
   use: { baseURL: 'http://localhost:3030' },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: {

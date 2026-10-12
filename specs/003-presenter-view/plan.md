@@ -10,3 +10,4 @@ I no hand-written code ✅ · II traces to Story 3 ✅ · III Gate Review Pack �
 
 ## Complexity Tracking
 None.
+- Build uses `slidev build --without-notes`: `presenter: dev` alone left notes in the public JS bundle (found by build check 2026-10-12).

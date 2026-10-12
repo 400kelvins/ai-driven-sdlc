@@ -17,7 +17,7 @@ function heading(page: Page, n: number) {
 }
 
 async function expectSlide(page: Page, n: number, from?: number) {
-  await expect(page).toHaveURL(new RegExp(`/${n}$`))
+  await expect(page).toHaveURL(new RegExp(`/${n}(\\?|$)`))
   await expect(heading(page, n)).toBeVisible()
   // Wait for the slide transition to finish before the next key press
   if (from && from !== n) await expect(heading(page, from)).toBeHidden()

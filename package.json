@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "slidev --port 3030",
-    "build": "slidev build",
+    "build": "slidev build --without-notes",
     "test": "playwright test",
     "test:unit": "node --test \"tests/unit/*.test.mjs\"",
     "review:speak": "node scripts/speak.mjs"

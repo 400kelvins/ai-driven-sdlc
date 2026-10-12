@@ -9,6 +9,9 @@ fonts:
   sans: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif'
   mono: 'ui-monospace, "SF Mono", Menlo, monospace'
 transition: slide-left
+duration: 20min
+timer: countdown
+presenter: dev
 mdc: true
 src: ./pages/intro.md
 ---
