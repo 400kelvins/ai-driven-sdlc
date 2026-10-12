@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "slidev --port 3030",
     "build": "slidev build",
-    "test": "playwright test"
+    "test": "playwright test",
+    "test:unit": "node --test \"tests/unit/*.test.mjs\"",
+    "review:speak": "node scripts/speak.mjs"
   },
   "dependencies": {
     "@slidev/cli": "53.0.0",
