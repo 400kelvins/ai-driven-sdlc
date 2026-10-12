@@ -3,11 +3,15 @@ layout: center
 class: text-center
 ---
 
-# Goodbye, Manual SDLC? {.!text-6xl}
+# Goodbye, Manual SDLC?
 
 <div class="text-2xl op-80 mt-4">Architecting the AI-Driven SDLC: What's Left for Humans?</div>
 
 <div class="mt-12 text-3xl">Say it. See it. Ship it.</div>
+
+<style>
+h1 { font-size: 3.75rem !important; }
+</style>
 
 <!--
 Welcome. Ask the room: who still writes requirements docs by hand? Keep hands up if you also estimate by hand, review every diff line by line, and read production logs yourself.
