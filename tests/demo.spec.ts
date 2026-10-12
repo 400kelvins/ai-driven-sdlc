@@ -1,7 +1,8 @@
 import { readFileSync } from 'node:fs'
 import { expect, test } from '@playwright/test'
+import { slideNo } from './helpers'
 
-const DEMO_SLIDE = '/3'
+const DEMO = 'Demo: Voice to Production'
 const fixture = readFileSync(new URL('./fixtures/sample.mp4', import.meta.url))
 
 test('demo slide plays the local recording', async ({ page }) => {
@@ -11,7 +12,7 @@ test('demo slide plays the local recording', async ({ page }) => {
   )
   await page.route(/^https?:\/\/(?!localhost:3030)/, (route) => route.abort())
 
-  await page.goto(DEMO_SLIDE)
+  await page.goto(`/${await slideNo(page, DEMO)}`)
   const video = page.getByTestId('demo-video')
   await expect(video).toBeVisible()
   await video.evaluate((v: HTMLVideoElement) => { v.muted = true; return v.play() })
@@ -20,7 +21,7 @@ test('demo slide plays the local recording', async ({ page }) => {
 
 test('missing recording shows a fallback message', async ({ page }) => {
   await page.route('**/demo/demo.mp4', (route) => route.fulfill({ status: 404, body: '' }))
-  await page.goto(DEMO_SLIDE)
+  await page.goto(`/${await slideNo(page, DEMO)}`)
   await expect(page.getByTestId('demo-fallback')).toBeVisible()
   await expect(page.getByTestId('demo-video')).toHaveCount(0)
   // No internal repo paths shown to the audience

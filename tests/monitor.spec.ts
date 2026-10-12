@@ -1,48 +1,48 @@
 import { expect, test } from '@playwright/test'
+import { deckSlides, onSlide, slideNo } from './helpers'
 
 const MONITOR = 'Live Monitoring'
 
-async function onSlide(page: import('@playwright/test').Page, n: number) {
-  await expect(page).toHaveURL(new RegExp(`/${n}(\\?|$)`))
-  // Wait until the slide has rendered, so keyboard shortcuts are registered
-  await expect(page.locator(`.slidev-page-${n} h1`)).toBeVisible()
-}
-
-for (const origin of [2, 6]) {
-  test(`M jumps to monitoring and M returns to slide ${origin}`, async ({ page }) => {
+test('M jumps to monitoring and M returns to the slide it left', async ({ page }) => {
+  const monitor = await slideNo(page, MONITOR)
+  const last = (await deckSlides(page)).length
+  for (const origin of [2, last]) {
     await page.goto(`/${origin}`)
     await onSlide(page, origin)
 
     await page.keyboard.press('m')
-    await onSlide(page, 4)
+    await onSlide(page, monitor)
     await expect(page.getByRole('heading', { level: 1, name: MONITOR })).toBeVisible()
 
     await page.keyboard.press('m')
     await onSlide(page, origin)
-  })
-}
+  }
+})
 
 test('M on the monitoring slide without an origin stays put', async ({ page }) => {
-  await page.goto('/4')
+  const monitor = await slideNo(page, MONITOR)
+  await page.goto(`/${monitor}`)
+  await onSlide(page, monitor)
   await page.keyboard.press('m')
-  await onSlide(page, 4)
+  await onSlide(page, monitor)
   // Arrow keys still work afterwards
   await page.keyboard.press('ArrowRight')
-  await onSlide(page, 5)
+  await onSlide(page, monitor + 1)
 })
 
 test('manual navigation clears the return point', async ({ page }) => {
+  const monitor = await slideNo(page, MONITOR)
   await page.goto('/2')
   await onSlide(page, 2)
   await page.keyboard.press('m')
-  await onSlide(page, 4)
+  await onSlide(page, monitor)
   await page.keyboard.press('ArrowRight')
-  await onSlide(page, 5)
+  await onSlide(page, monitor + 1)
   await page.keyboard.press('ArrowLeft')
-  await onSlide(page, 4)
+  await onSlide(page, monitor)
   // Arrived by arrows, not by M: M must not jump back to slide 2
   await page.keyboard.press('m')
-  await onSlide(page, 4)
+  await onSlide(page, monitor)
 })
 
 test('Cmd+M does not toggle monitoring', async ({ page }) => {

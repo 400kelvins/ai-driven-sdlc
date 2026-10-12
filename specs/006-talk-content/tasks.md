@@ -1,0 +1,5 @@
+- [X] T001 [US1] Write pages/intro.md (title + hook)
+- [X] T002 [US1] Write pages/talk.md (11 narrative slides with notes)
+- [X] T003 [US2] Add tests/helpers.ts and move tests to title lookup
+- [X] T004 [US1] Add tests/content.spec.ts (every slide has notes; section order; closing line)
+- [X] T005 [US2] Timing estimate script check
