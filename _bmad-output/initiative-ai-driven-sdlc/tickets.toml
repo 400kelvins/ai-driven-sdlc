@@ -1,0 +1,5 @@
+[[epic]]
+id = 1
+slug = "epic-keynote-deck"
+title = "AI-built Keynote-style deck for the AI-Driven SDLC talk"
+covers = ["FR-1", "FR-2", "FR-3", "FR-4", "FR-6", "FR-7", "FR-8", "FR-9", "FR-14", "FR-15", "FR-16", "FR-17", "FR-18", "FR-19"]

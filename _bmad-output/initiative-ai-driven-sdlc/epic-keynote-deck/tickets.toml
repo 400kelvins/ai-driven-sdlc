@@ -1,0 +1,112 @@
+[[entry]]
+id = 1
+type = "story"
+title = "Slidev scaffold with arrow-key navigation"
+description = "Stands up the Slidev deck served locally with arrow-key navigation (the FR-1 keys part) and a one-file-per-section layout via Slidev src imports (slides.md plus pages/intro.md, pages/talk.md, pages/demo.md, pages/monitor.md, pages/behind.md, pages/retro.md, pages/links.md) so later entries each own one file."
+verify = "npm run dev serves the deck; right/down arrows advance, left/up go back; each section file renders a placeholder title slide; an early Vercel preview deploy serves it with clean logs."
+covers = ["FR-1"]
+after = []
+hitl = false
+risk = "low"
+
+[[entry]]
+id = 2
+type = "story"
+title = "Read-aloud Gate Review Pack tool"
+description = "Adds a Gate Review Pack template (summary, table, Mermaid diagram, estimate fields: hours, story points, tokens, dollars) and an npm script that reads a pack or code review summary aloud [ASSUMPTION: macOS say]; entries 7 and 9 consume the template and its estimate fields."
+verify = "npm run review:speak -- <file> on a sample pack speaks its summary; the sample pack renders its table and diagram."
+covers = ["FR-4", "FR-6", "FR-14"]
+after = [1]
+hitl = false
+risk = "low"
+
+[[entry]]
+id = 3
+type = "story"
+title = "Presenter View with notes, clock, and 20-minute countdown"
+description = "Configures Slidev presenter mode for the Presenter/Audience sync part of FR-1, plus notes, current and next slide, current time, elapsed time, and a 20-minute countdown; owns slides.md headmatter and global layout only."
+verify = "/presenter shows notes, the next-slide preview, both clocks, and a countdown from 20:00; the Audience View in a second window follows navigation and shows no notes."
+covers = ["FR-1", "FR-2", "FR-3"]
+after = [1]
+hitl = false
+risk = "medium"
+
+[[entry]]
+id = 4
+type = "story"
+title = "Switch to live monitoring view and back"
+description = "Adds a key or slide action that switches the Audience View to a live monitoring view and returns to the same slide; owns pages/monitor.md."
+verify = "During a run the presenter presses the switch, sees the monitoring view, presses again, and lands on the slide they left."
+covers = ["FR-19"]
+after = [1]
+hitl = true
+risk = "high"
+references = ["Decision 2026-10-12: monitoring view shows the live Claude Code session"]
+
+[[entry]]
+id = 5
+type = "story"
+title = "Embedded offline demo video slide"
+description = "Adds a video slide that plays the bundled demo recording from the repo, controlled from the deck, working without network; owns pages/demo.md and public/demo/."
+verify = "With Wi-Fi off, the video slide plays the recording from start to end inside the deck."
+covers = ["FR-15"]
+after = [1]
+hitl = true
+risk = "medium"
+references = ["Decision 2026-10-12: one compressed MP4 under 3 minutes in public/demo/, cut from the session screen recording"]
+
+[[entry]]
+id = 6
+type = "story"
+title = "20-minute talk content with speaker notes"
+description = "Writes the talk slides with notes per PRD §6.1: title, old vs new SDLC side by side (addendum.md, Slide 5 and Slide 6), tools per Stage, Human Gates and Gate Review Packs, What's left for humans, costs (review fatigue, feel-faster-not-faster), closing line; owns pages/intro.md and pages/talk.md."
+verify = "A timed rehearsal lands within 20 minutes including demo time, and every slide has notes."
+covers = []
+after = [3]
+hitl = true
+risk = "medium"
+
+[[entry]]
+id = 7
+type = "story"
+title = "Publish repo to GitHub and deploy to Vercel with log check"
+description = "After local verification (npm run build passes and the deck plays locally), publishes the repo publicly on GitHub with Stories, specs, and Gate Review Packs, deploys to Vercel, reads the deployment logs, writes a deploy Gate Review Pack from entry 2's template, and adds pages/links.md with the URL and repo [ASSUMPTION: as QR codes]. Later entries redeploy with the same log check."
+verify = "The public Vercel URL serves the deck; the public repo contains _bmad-output Stories, specs, and Gate Review Packs; the deploy pack reports healthy logs."
+covers = ["FR-7", "FR-8", "FR-16", "FR-17"]
+after = [2, 3]
+hitl = true
+risk = "medium"
+
+[[entry]]
+id = 8
+type = "story"
+title = "Behind-the-scenes slides"
+description = "Adds slides showing real sprint artifacts beside their results: a Story, a Gate Review Pack, a code review summary, the deploy log check; owns pages/behind.md."
+verify = "Each behind-the-scenes slide shows an artifact from the repo, links to its file on GitHub, and has speaker notes."
+covers = ["FR-18"]
+after = [2, 7]
+hitl = false
+risk = "low"
+
+[[entry]]
+id = 9
+type = "story"
+title = "Sprint retrospective slide"
+description = "Builds the retrospective slide from entry 2's estimate fields, the Story plans, and git history: features shipped, estimated vs actual time, total token and dollar cost, test type per feature; owns pages/retro.md."
+verify = "The slide shows all four measures with speaker notes, and its numbers match the Story plans, git log, and usage source."
+covers = ["FR-9"]
+after = [1, 2, 3, 4, 5, 6, 7, 8]
+hitl = false
+risk = "medium"
+references = ["Decision 2026-10-12: actual time from git timestamps; tokens/dollars from Claude Code usage (/cost or ccusage)"]
+
+[[entry]]
+id = 10
+type = "story"
+title = "Refactor sweep"
+description = "Cleanup only, scoped from the plans and deferred review findings of entries 1-9."
+verify = "Deck builds, all slides render, and the deferred findings list is closed or recorded."
+covers = []
+after = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+hitl = false
+risk = "low"
