@@ -1,8 +1,8 @@
 <!--
 Sync Impact Report
-- Version change: (template) → 1.0.0
-- Modified principles: all placeholders replaced (initial ratification)
-- Added sections: Core Principles I–VI, Stage Constraints, Development Workflow & Gates, Governance
+- Version change: 1.0.0 → 1.1.0 (MINOR: Principle I scope clarified; human-owned content exception added)
+- Modified principles: I. No Hand-Written Code — content/notes carved out for the presenter
+- Added sections: none
 - Removed sections: none
 - Deferred TODOs: none
 -->
@@ -11,9 +11,17 @@ Sync Impact Report
 ## Core Principles
 
 ### I. No Hand-Written Code (NON-NEGOTIABLE)
-All application code, configuration, and content files in this repository MUST be produced by AI
-agents. The human MAY speak or type intent, answer questions, and approve or reject at Gates, but
-MUST NOT author code by hand. Rationale: the talk claims an AI-built product; the repo is the proof.
+All application code and configuration in this repository MUST be produced by AI agents. The human
+MAY speak or type intent, answer questions, and approve or reject at Gates, but MUST NOT author
+code or configuration by hand.
+
+**Human-owned content (exception)**: The presenter MAY edit slide wording and speaker notes in
+`pages/*.md` by hand, locally. Such edits MUST stay within Markdown text and `<!-- -->` notes —
+no Vue components, scripts, styles, or frontmatter changes. Content edits are committed with the
+prefix `content:` so the git history separates human content from AI code.
+
+Rationale: the talk claims an AI-built product with zero hand-written code; the repo is the proof.
+The talk's words and notes stay in the presenter's own voice.
 
 ### II. Spec Is the Living Source of Truth
 Every change MUST trace to a BMad Story in
@@ -63,4 +71,4 @@ This constitution supersedes other practices in this repo. Amendments are made t
 MINOR: principle or section added; PATCH: wording). Every plan's Constitution Check MUST confirm
 Principles I–VI; any deviation MUST be justified in the plan's Complexity Tracking.
 
-**Version**: 1.0.0 | **Ratified**: 2026-10-12 | **Last Amended**: 2026-10-12
+**Version**: 1.1.0 | **Ratified**: 2026-10-12 | **Last Amended**: 2026-10-12
