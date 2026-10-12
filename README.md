@@ -32,8 +32,8 @@ a [Gate Review Pack](templates/gate-review-pack.md) that combines all three.
 
 | Gate | When | How it is enforced |
 |---|---|---|
-| Plan | Before `/speckit-implement` | spec-kit hook ([`.specify/extensions.yml`](.specify/extensions.yml)) stops the agent and asks |
-| Code | After implementation and tests | spec-kit hook |
+| Plan | Before `/speckit-implement` | Declared as a required hook in [`.specify/extensions.yml`](.specify/extensions.yml); spec-kit's implement skill instructs the agent to run [`/speckit-gate-plan`](.claude/skills/speckit-gate-plan/SKILL.md) and wait |
+| Code | After implementation and tests | Same mechanism: [`/speckit-gate-implement`](.claude/skills/speckit-gate-implement/SKILL.md) |
 | Review | After the AI code review | The decision is recorded with a fingerprint of everything that ships. `npm run ship` refuses to deploy if any shipped file has changed since the yes. |
 
 Decisions are recorded in the [gate log](_bmad-output/initiative-ai-driven-sdlc/epic-keynote-deck/gates.jsonl).
@@ -53,9 +53,10 @@ log makes any decision visible in review.
 | Gate skills | [`.claude/skills/speckit-gate/`](.claude/skills/speckit-gate/SKILL.md) |
 | Slides | [`slides.md`](slides.md), [`pages/`](pages/) |
 
-**Spec-kit coverage:** Stories 1 and 7 went through the full `/speckit-*` command pipeline. Stories
-2–6 have specs in spec-kit's format, but they were implemented without `/speckit-implement`, so their
-gates were not triggered by hooks. The retrospective covers this.
+**Spec-kit coverage:** Story 1 ran every `/speckit-*` command before the gates existed. Story 7 is
+the first to run every command with all three gates recorded in the gate log. Stories 2–6 have specs
+in spec-kit's format, but they were implemented without `/speckit-implement`, so no hooks fired for
+them. The retrospective covers this.
 
 ## Run it
 
