@@ -28,7 +28,7 @@
 **Independent Test**: README links resolve to existing files.
 
 - [ ] T008 [P] [US2] Write README with pitch, lifecycle diagram, three gates, artifact map (PRD, Stories, specs, gate packs, gates.jsonl), run/verify/ship commands, in README.md
-- [ ] T009 [P] [US2] Add MIT license (copyright 400kelvins) in LICENSE
+- [ ] T009 [P] [US2] Add Apache-2.0 license (copyright 400kelvins) in LICENSE
 - [ ] T010 [US2] Write unit test: every relative link in README.md points to an existing path, in tests/unit/readme-links.test.mjs
 
 ## Phase 5: User Story 3 — Nothing private (P1)

@@ -127,6 +127,6 @@ After this Story ships, the deployment logs are read and reported in a Gate Revi
 
 - Account `400kelvins` is authenticated locally for GitHub and Vercel.
 - The deck stays at its current hosting address.
-- License: MIT, so attendees can reuse the blueprint. [Assumption; presenter may change]
+- License: Apache-2.0 (presenter decision at the plan gate, 2026-10-12).
 - BMad and spec-kit tool folders (`_bmad/`, `.claude/`, `.agents/`, `.specify/`) are published too,
   so the process is reproducible.
