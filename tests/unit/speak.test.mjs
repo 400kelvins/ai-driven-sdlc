@@ -2,7 +2,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { execFileSync, spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
-import { extractSummary, highlightScript, stripMarkdown } from '../../scripts/speak.mjs'
+import { extractSummary, highlightScript, stripMarkdown, terminalApp } from '../../scripts/speak.mjs'
 
 const SCRIPT = fileURLToPath(new URL('../../scripts/speak.mjs', import.meta.url))
 const PACK_FIXTURE = fileURLToPath(new URL('../fixtures/gate-pack.md', import.meta.url))
@@ -66,4 +66,14 @@ test('highlight script runs say interactively from the temp file', () => {
 
 test('highlight script rejects unsafe paths', () => {
   assert.throws(() => highlightScript("/tmp/a'; rm -rf ~; '"), /Unsafe/)
+})
+
+test('uses iTerm when launched from iTerm, Terminal otherwise', () => {
+  assert.equal(terminalApp({ TERM_PROGRAM: 'iTerm.app' }), 'iTerm')
+  assert.equal(terminalApp({ TERM_PROGRAM: 'Apple_Terminal' }), 'Terminal')
+  assert.equal(terminalApp({}), 'Terminal')
+  const script = highlightScript('/var/folders/x/speak-abc/summary.txt', 'iTerm')
+  assert.match(script, /tell application "iTerm"/)
+  assert.match(script, /create window with default profile/)
+  assert.match(script, /write text "clear; say --interactive=smso/)
 })

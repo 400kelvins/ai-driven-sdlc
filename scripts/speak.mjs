@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Reads the "Summary (read aloud)" section of a Gate Review Pack aloud.
 // Usage: npm run review:speak -- <file.md> [--dry-run] [--highlight]
-//   --highlight  open a Terminal window that highlights each word as it is spoken
+//   --highlight  open an iTerm (or Terminal) window that highlights each word as it is spoken
 import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
 import { spawn } from 'node:child_process'
 import { tmpdir } from 'node:os'
@@ -36,17 +36,31 @@ export function stripMarkdown(text) {
     .trim()
 }
 
-// AppleScript that runs `say --interactive` in a new Terminal window. The text is read
-// from a temp file, so nothing from the pack reaches a shell command line.
-export function highlightScript(textFile) {
+// AppleScript that runs `say --interactive` in a new window of the presenter's terminal
+// (iTerm when it launched us, else Apple Terminal). The text is read from a temp file,
+// so nothing from the pack reaches a shell command line.
+export function highlightScript(textFile, app = 'Terminal') {
   if (!/^[\w./-]+$/.test(textFile)) throw new Error(`Unsafe temp path: ${textFile}`)
   const cmd = `clear; say --interactive=smso -f '${textFile}'; exit`
+  if (app === 'iTerm') {
+    return [
+      'tell application "iTerm"',
+      '  activate',
+      '  set w to (create window with default profile)',
+      `  tell current session of w to write text "${cmd}"`,
+      'end tell',
+    ].join('\n')
+  }
   return [
     'tell application "Terminal"',
     `  do script "${cmd}"`,
     '  activate',
     'end tell',
   ].join('\n')
+}
+
+export function terminalApp(env = process.env) {
+  return env.TERM_PROGRAM === 'iTerm.app' ? 'iTerm' : 'Terminal'
 }
 
 function speakHighlighted(text) {
@@ -58,7 +72,7 @@ function speakHighlighted(text) {
     process.exit(1)
   })
   osa.on('exit', (code, signal) => process.exit(signal ? 1 : (code ?? 1)))
-  osa.stdin.end(highlightScript(file))
+  osa.stdin.end(highlightScript(file, terminalApp()))
 }
 
 function main(argv) {
