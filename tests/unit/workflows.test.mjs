@@ -1,6 +1,9 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { readFileSync } from 'node:fs'
+import { execFileSync } from 'node:child_process'
+import { mkdirSync, mkdtempSync, readFileSync, symlinkSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { parseDocument } from 'yaml'
 
@@ -154,4 +157,51 @@ test('the slide comment has one marker and is updated in place', () => {
   assert.match(visuals, /## Slide changes/)
   assert.match(visuals, /No slide changed/)
   assert.match(visuals, /gh api -X PATCH/)
+})
+
+// Runs the publish job's "Validate the artifact" step on a crafted folder; returns its ok output
+function validate(files, { manifest, symlinkManifest = false } = {}) {
+  const step = parseDocument(visuals).toJS().jobs.publish.steps.find((s) => s.name === 'Validate the artifact')
+  const root = mkdtempSync(join(tmpdir(), 'artifact-'))
+  const art = join(root, 'art')
+  mkdirSync(art)
+  for (const [name, body] of Object.entries(files)) {
+    if (body === 'LINK') symlinkSync('/etc/hosts', join(art, name))
+    else writeFileSync(join(art, name), body)
+  }
+  if (manifest) {
+    if (symlinkManifest) {
+      writeFileSync(join(root, 'real.json'), JSON.stringify(manifest))
+      symlinkSync(join(root, 'real.json'), join(art, 'manifest.json'))
+    } else writeFileSync(join(art, 'manifest.json'), JSON.stringify(manifest))
+  }
+  const out = join(root, 'out')
+  writeFileSync(out, '')
+  execFileSync('bash', ['-c', step.run], { cwd: root, env: { ...process.env, GITHUB_OUTPUT: out }, stdio: 'ignore' })
+  return readFileSync(out, 'utf8').trim()
+}
+
+const PNG = Buffer.concat([Buffer.from('89504e470d0a1a0a', 'hex'), Buffer.from('image')])
+const one = { total: 21, baseMissing: false, changes: [{ slide: 3, kind: 'changed' }] }
+
+test('artifact check accepts images that match the manifest exactly', () => {
+  assert.equal(validate({ '003-before.png': PNG, '003-after.png': PNG }, { manifest: one }), 'ok=true')
+  assert.equal(validate({}, { manifest: { total: 21, baseMissing: false, changes: [] } }), 'ok=true')
+  const added = { total: 22, baseMissing: false, changes: [{ slide: 22, kind: 'new' }] }
+  assert.equal(validate({ '022-after.png': PNG }, { manifest: added }), 'ok=true')
+})
+
+test('artifact check rejects anything else', () => {
+  const pair = { '003-before.png': PNG, '003-after.png': PNG }
+  assert.equal(validate(pair), 'ok=false', 'no manifest')
+  assert.equal(validate({ ...pair, 'evil.sh': 'echo pwned' }, { manifest: one }), 'ok=false', 'extra file')
+  assert.equal(validate({ ...pair, '.hidden': 'x' }, { manifest: one }), 'ok=false', 'hidden file')
+  assert.equal(validate({ '003-before.png': PNG, '003-after.png': 'not a png' }, { manifest: one }), 'ok=false', 'bad signature')
+  assert.equal(validate({ '003-before.png': PNG, '003-after.png': 'LINK' }, { manifest: one }), 'ok=false', 'symlinked image')
+  assert.equal(validate(pair, { manifest: one, symlinkManifest: true }), 'ok=false', 'symlinked manifest')
+  assert.equal(validate({ '003-after.png': PNG }, { manifest: one }), 'ok=false', 'missing before image')
+  assert.equal(validate(pair, { manifest: { ...one, changes: [{ slide: 3, kind: 'changed', x: 'y' }] } }), 'ok=false', 'extra key')
+  assert.equal(validate(pair, { manifest: { ...one, changes: [{ slide: '3', kind: 'changed' }] } }), 'ok=false', 'string slide')
+  assert.equal(validate(pair, { manifest: { ...one, changes: [{ slide: 3, kind: '$(id)' }] } }), 'ok=false', 'bad kind')
+  assert.equal(validate({ ...pair, '004-after.png': Buffer.concat([PNG, Buffer.alloc(2_200_000)]) }, { manifest: one }), 'ok=false', 'oversize')
 })

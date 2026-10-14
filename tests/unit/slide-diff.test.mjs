@@ -56,7 +56,7 @@ test('the CLI writes a manifest and copies only the listed images', () => {
   const stdout = execFileSync('node', [SCRIPT, base, head, out], { encoding: 'utf8' })
   assert.match(stdout, /2 changed/)
   assert.deepEqual(JSON.parse(readFileSync(join(out, 'manifest.json'), 'utf8')), {
-    total: 2 + 1,
+    total: 3,
     baseMissing: false,
     changes: [
       { slide: 2, kind: 'changed' },

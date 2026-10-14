@@ -72,15 +72,19 @@ jobs:
         run: |
           npm ci
           npx slidev --port 3031 > ../base-dev.log 2>&1 &
-          for i in $(seq 1 60); do curl -sf http://localhost:3031 > /dev/null && break; sleep 2; done
-          node ../head/scripts/slide-shots.mjs http://localhost:3031 ../shots/base
+          up=false; for i in $(seq 1 60); do curl -sf http://localhost:3031 > /dev/null && up=true && break; sleep 2; done
+          [ "$up" = true ] || { echo "::warning::Base deck did not start"; exit 1; }
+          # Keep the base shots only if every slide was photographed
+          node ../head/scripts/slide-shots.mjs http://localhost:3031 ../shots/base-partial
+          mv ../shots/base-partial ../shots/base
 
       - name: Photograph the head deck
         if: steps.fork.outputs.run == 'true'
         working-directory: head
         run: |
           npx slidev --port 3032 > ../head-dev.log 2>&1 &
-          for i in $(seq 1 60); do curl -sf http://localhost:3032 > /dev/null && break; sleep 2; done
+          up=false; for i in $(seq 1 60); do curl -sf http://localhost:3032 > /dev/null && up=true && break; sleep 2; done
+          [ "$up" = true ] || { echo "::error::Head deck did not start"; cat ../head-dev.log; exit 1; }
           node scripts/slide-shots.mjs http://localhost:3032 ../shots/head
 
       - name: Keep only the slides that changed
@@ -97,7 +101,7 @@ jobs:
   publish:
     # A fresh runner that never checks out or runs PR code: the only job allowed to write
     needs: shots
-    if: always() && github.event.pull_request.head.repo.full_name == github.repository
+    if: ${{ !cancelled() && github.event.pull_request.head.repo.full_name == github.repository }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -116,29 +120,42 @@ jobs:
           path: art
 
       # The artifact came from a job that ran PR code, so it is untrusted: accept only PNG images
-      # with numeric names and a manifest of integers and fixed words
+      # with numeric names, capped in number and size, that match a manifest of integers and fixed
+      # words. Unit-tested by running this block on crafted folders (tests/unit/workflows.test.mjs).
       - name: Validate the artifact
         id: check
         run: |
           ok=false
-          if [ -f art/manifest.json ] && jq -e '
+          m=art/manifest.json
+          if [ -f "$m" ] && [ ! -L "$m" ] && [ "$(wc -c < "$m")" -le 65536 ] && jq -e '
               (.total | type == "number" and . == floor and . >= 0 and . <= 999)
               and (.baseMissing | type == "boolean")
-              and (.changes | type == "array")
+              and (.changes | type == "array" and length <= 999)
               and all(.changes[]; (.slide | type == "number" and . == floor and . >= 1 and . <= 999)
                                   and (.kind | IN("changed", "new", "removed"))
-                                  and (keys == ["kind", "slide"]))' art/manifest.json > /dev/null; then
+                                  and (keys == ["kind", "slide"]))' "$m" > /dev/null; then
             ok=true
+            count=0
+            bytes=0
             for f in art/* art/.[!.]*; do
-              [ -e "$f" ] || continue
+              [ -e "$f" ] || [ -L "$f" ] || continue
               name=$(basename "$f")
               [ "$name" = manifest.json ] && continue
               if ! [[ "$name" =~ ^[0-9]{3}-(before|after)\.png$ ]] || [ -L "$f" ] || [ ! -f "$f" ] \
-                || [ "$(stat -c %s "$f")" -gt 2097152 ] \
+                || [ "$(wc -c < "$f")" -gt 2097152 ] \
                 || [ "$(head -c 8 "$f" | od -An -tx1 | tr -d ' \n')" != "89504e470d0a1a0a" ]; then
-                echo "::error::Invalid artifact file: $name"; ok=false
+                echo "::error::Invalid artifact file: $name"; ok=false; continue
               fi
+              count=$((count + 1))
+              bytes=$((bytes + $(wc -c < "$f")))
             done
+            # The images must be exactly the ones the manifest names
+            expected=$(jq -r '.changes[] | (.slide | tostring | ("00" + .) | .[-3:]) as $p
+              | (if .kind != "new" then "\($p)-before.png" else empty end),
+                (if .kind != "removed" then "\($p)-after.png" else empty end)' "$m" | sort)
+            actual=$(cd art && ls -1 | grep -v '^manifest\.json$' | sort)
+            if [ "$expected" != "$actual" ]; then echo "::error::Artifact images do not match the manifest"; ok=false; fi
+            if [ "$count" -gt 40 ] || [ "$bytes" -gt 52428800 ]; then echo "::error::Artifact too large"; ok=false; fi
           fi
           echo "ok=$ok" >> "$GITHUB_OUTPUT"
 
@@ -154,24 +171,34 @@ jobs:
           git config --global user.name 'github-actions[bot]'
           git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
           remote="https://github.com/$REPO.git"
-          if git ls-remote --exit-code --heads "$remote" pr-assets > /dev/null; then
-            git clone --quiet --depth 1 --branch pr-assets "$remote" assets
-          else
-            git init --quiet -b pr-assets assets
-            git -C assets remote add origin "$remote"
-          fi
-          mkdir -p "assets/pr-$PR/$SHA"
-          cp "${images[@]}" "assets/pr-$PR/$SHA/"
-          git -C assets add -A
-          git -C assets commit --quiet -m "PR #$PR: slide screenshots for ${SHA:0:7}"
+          # Each attempt starts from a fresh copy, so a concurrent push (including two PRs creating
+          # the branch at once) is retried on top of whatever won
           for attempt in 1 2 3; do
+            rm -rf assets
+            # Exit 2 means the branch does not exist yet; any other failure is a real error
+            found=0
+            git ls-remote --exit-code --heads "$remote" pr-assets > /dev/null || found=$?
+            if [ "$found" -eq 0 ]; then
+              git clone --quiet --depth 1 --branch pr-assets "$remote" assets
+            elif [ "$found" -eq 2 ]; then
+              git init --quiet -b pr-assets assets
+              git -C assets remote add origin "$remote"
+            else
+              echo "::error::Could not reach the repository"; exit 1
+            fi
+            mkdir -p "assets/pr-$PR/$SHA"
+            cp "${images[@]}" "assets/pr-$PR/$SHA/"
+            git -C assets add -A
+            # A re-run of the same commit produces the same images: already stored
+            if git -C assets diff --cached --quiet; then echo "stored=yes" >> "$GITHUB_OUTPUT"; exit 0; fi
+            git -C assets commit --quiet -m "PR #$PR: slide screenshots for ${SHA:0:7}"
             if git -C assets push --quiet origin pr-assets; then echo "stored=yes" >> "$GITHUB_OUTPUT"; exit 0; fi
-            git -C assets pull --quiet --rebase --depth 1 origin pr-assets
+            sleep $((attempt * 3))
           done
           echo "::error::Could not push to pr-assets"; exit 1
 
       - name: Post the slide comment (updated in place)
-        if: always()
+        if: ${{ !cancelled() }}
         env:
           OK: ${{ steps.check.outputs.ok }}
           STORED: ${{ steps.store.outputs.stored }}

@@ -14,7 +14,8 @@ const pad = (n) => String(n).padStart(3, '0')
 /** base, head: Map<slide number, image bytes>. Byte compare: rendering is deterministic on one runner. */
 export function diff(base, head) {
   const changes = []
-  for (const slide of new Set([...base.keys(), ...head.keys()])) {
+  const slides = new Set([...base.keys(), ...head.keys()])
+  for (const slide of slides) {
     const before = base.get(slide)
     const after = head.get(slide)
     if (!before) changes.push({ slide, kind: 'new' })
@@ -22,7 +23,8 @@ export function diff(base, head) {
     else if (!before.equals(after)) changes.push({ slide, kind: 'changed' })
   }
   changes.sort((a, b) => a.slide - b.slide)
-  return { total: head.size, baseMissing: base.size === 0, changes }
+  // total counts removed slides too, so "N of total changed" never exceeds 100%
+  return { total: slides.size, baseMissing: base.size === 0, changes }
 }
 
 function readShots(dir) {
