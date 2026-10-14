@@ -52,7 +52,7 @@ jobs:
         uses: anthropics/claude-code-action@fd1c128679612beff4ca259c78021c506e8aa7a7 # v1.0.237
         env:
           # Organization-level API keys must name a workspace; set the repo variable to send it
-          ANTHROPIC_CUSTOM_HEADERS: ${{ vars.ANTHROPIC_WORKSPACE_ID && format('anthropic-workspace-id: {0}', vars.ANTHROPIC_WORKSPACE_ID) || '' }}
+          ANTHROPIC_CUSTOM_HEADERS: "${{ vars.ANTHROPIC_WORKSPACE_ID && format('anthropic-workspace-id: {0}', vars.ANTHROPIC_WORKSPACE_ID) || '' }}"
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ secrets.GITHUB_TOKEN }}

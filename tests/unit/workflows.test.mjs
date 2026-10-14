@@ -2,6 +2,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
+import { parseDocument } from 'yaml'
 
 const ROOT = fileURLToPath(new URL('../../', import.meta.url))
 const ci = readFileSync(`${ROOT}.github/workflows/ci.yml`, 'utf8')
@@ -10,6 +11,10 @@ const review = readFileSync(`${ROOT}.github/workflows/claude-review.yml`, 'utf8'
 // Job ids sit at two-space indent under `jobs:`
 const jobs = (yml) => [...yml.split(/^jobs:\n/m)[1].matchAll(/^ {2}([\w-]+):\s*$/gm)].map((m) => m[1])
 const uses = (yml) => [...yml.matchAll(/uses:\s*(\S+)/g)].map((m) => m[1])
+
+test('both workflows are valid YAML (GitHub silently runs no jobs otherwise)', () => {
+  for (const yml of [ci, review]) assert.deepEqual(parseDocument(yml).errors.map((e) => e.message), [])
+})
 
 test('CI has exactly the two required checks branch protection names', () => {
   assert.deepEqual(jobs(ci), ['verify', 'human-gate'])
