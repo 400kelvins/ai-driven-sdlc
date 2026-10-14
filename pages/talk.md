@@ -204,11 +204,11 @@ Every change, even my own slide edits, now arrives as a pull request. Two checks
 <div class="grid grid-cols-2 gap-6 mt-6">
 <div class="text-center">
 <div class="op-70 mb-2">Before</div>
-<img src="/pr-demo/slide3-before.png" class="rounded border border-gray-400/40" />
+<img src="/pr-demo/slide3-before.png" alt="Slide 3 before" class="rounded border border-gray-400/40" />
 </div>
 <div class="text-center">
 <div class="op-70 mb-2">After</div>
-<img src="/pr-demo/slide3-after.png" class="rounded border border-gray-400/40" />
+<img src="/pr-demo/slide3-after.png" alt="Slide 3 after" class="rounded border border-gray-400/40" />
 </div>
 </div>
 
