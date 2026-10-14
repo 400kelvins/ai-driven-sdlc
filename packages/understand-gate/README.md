@@ -2,17 +2,39 @@
 
 No yes without understanding: human review gates for AI-written code.
 
-Early work in progress. Today it computes a fingerprint per scope; the ledger, the CI check, and the
-installer follow (see the architecture spine in this repo).
+Early work in progress. Today it fingerprints each scope, records decisions in a ledger, checks every
+scope a branch touches, and reports quiz stats. CI wiring, proof of a human yes, and the installer
+follow (see the architecture spine in this repo).
 
-## Command
+## Commands
 
 ```sh
 understand-gate fingerprint --scope <name>
+understand-gate record --scope deck,package --stage review --story 2.2 --decision yes \
+  [--attempts 2] [--first-try no] [--confidence 4] [--note "why"]
+understand-gate check --base origin/main     # every scope the branch touched
+understand-gate check --all                  # every scope
+understand-gate stats                        # first-try quiz rate, re-explanations, no count
 ```
 
-Prints a 16-character fingerprint of the files in that scope: the committed files, plus any
-uncommitted, new, or deleted files in it. Exit codes: 0 pass, 1 failure, 2 usage.
+- `fingerprint` prints a 16-character hash of the files in a scope: the committed files, plus any
+  uncommitted, new, or deleted files in it.
+- `record` appends one line per scope to `.understand-gate/gates.jsonl`. It refuses while a scope
+  has uncommitted changes, so the yes covers what CI will see.
+- `check` passes only when each scope's latest `review` line is `yes` and matches its fingerprint.
+  A branch that touches no scope passes.
+- Exit codes: 0 pass, 1 failure, 2 usage. Errors are one line on stderr.
+
+## The ledger
+
+One JSON object per line, appended, never rewritten. The latest line for a scope and stage decides.
+
+```json
+{"ts":"2026-10-15T08:00:00.000Z","scope":"deck","stage":"review","story":"2.2","decision":"yes",
+ "fingerprint":"1afa3c26d4d4de6d","proof":null,"attempts":2,"firstTry":false,"confidence":4,"note":null}
+```
+
+`proof` is filled in by a later version. The ledger is never part of any scope.
 
 ## Scopes
 

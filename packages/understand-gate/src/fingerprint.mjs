@@ -2,28 +2,14 @@
 // Any change to a file in the scope must move it, whatever the file is named; git output is read
 // NUL-separated, never quoted, and diff output is pinned so local and CI runs agree.
 import { createHash } from 'node:crypto'
-import { execFileSync } from 'node:child_process'
 import { lstatSync, readFileSync, readlinkSync } from 'node:fs'
 import { join } from 'node:path'
+import { entries, git as run, repoRoot } from './git.mjs'
 import { inScope } from './scopes.mjs'
 
-const MAX_BUFFER = 1024 * 1024 * 1024
+export { repoRoot }
+
 const DIFF = ['diff', 'HEAD', '--binary', '--no-color', '--no-ext-diff', '--no-textconv', '--no-renames']
-
-export function repoRoot(cwd = process.cwd()) {
-  return run(cwd, 'rev-parse', '--show-toplevel').trim()
-}
-
-function run(cwd, ...args) {
-  return execFileSync('git', ['--literal-pathspecs', ...args], {
-    cwd,
-    encoding: 'utf8',
-    maxBuffer: MAX_BUFFER,
-    stdio: ['ignore', 'pipe', 'pipe'],
-  })
-}
-
-const entries = (out) => out.split('\0').filter(Boolean)
 
 /** Length-prefixed, so two different (path, content) pairs never hash the same bytes. */
 function frame(hash, ...parts) {

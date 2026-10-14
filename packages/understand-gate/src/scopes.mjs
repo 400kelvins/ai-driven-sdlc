@@ -4,6 +4,7 @@
 //   an exclude starting with ! re-includes; the last matching exclude wins.
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { LEDGER } from './ledger.mjs'
 
 export const CONFIG = '.understand-gate/config.json'
 
@@ -35,6 +36,8 @@ export function matches(pattern, path) {
 }
 
 export function inScope(path, scope) {
+  // The ledger records decisions about scopes, so it can never be part of one (AD-3)
+  if (path === LEDGER) return false
   if (!scope.include.some((p) => matches(p, path))) return false
   let excluded = false
   for (const p of scope.exclude ?? []) {
