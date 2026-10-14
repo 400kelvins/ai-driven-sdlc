@@ -61,7 +61,8 @@ test('pushes to main never cancel each other', () => {
 
 test('branch protection requires both checks, up to date, for admins too', () => {
   const p = JSON.parse(readFileSync(`${ROOT}.github/branch-protection.json`, 'utf8'))
-  assert.deepEqual(p.required_status_checks, { strict: true, contexts: jobs(ci) })
+  // Pinned to the GitHub Actions app (15368), so no other app or token can post a green check
+  assert.deepEqual(p.required_status_checks, { strict: true, checks: jobs(ci).map((context) => ({ context, app_id: 15368 })) })
   assert.equal(p.enforce_admins, true)
   assert.equal(p.allow_force_pushes, false)
   assert.equal(p.allow_deletions, false)
