@@ -12,3 +12,4 @@
 {"at":"2026-10-14T13:46:03.685Z","stage":"plan","story":"13","decision":"yes","fingerprint":"3cb22e18845bcd68","commit":"61ad97d","note":"quiz passed first try"}
 {"at":"2026-10-14T13:49:12.084Z","stage":"implement","story":"13","decision":"yes","fingerprint":"2bb6de73ce30128f","commit":"448c514","note":"quiz passed first try"}
 {"at":"2026-10-14T13:56:14.352Z","stage":"review","story":"13","decision":"yes","fingerprint":"a97ed4eb09fb4c9a","commit":"431144c","note":"quiz passed first try"}
+{"at":"2026-10-14T22:09:08.481Z","stage":"plan","story":"2.1","decision":"yes","fingerprint":"a97ed4eb09fb4c9a","commit":"3938cd8","note":"quiz wrong first (thought specs/ changes both), passed after the locked-boxes re-explain"}
