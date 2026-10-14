@@ -56,6 +56,15 @@ GitHub does not let authors approve their own pull requests, so the human approv
 backed by the gate log rather than a GitHub review. The flow is: open the PR, the AI reviews it,
 you read and hear the review pack, say yes, push the `docs:` gate commit, `human-gate` turns green,
 and you merge. Merging does not deploy. `npm run ship` on `main` does. See [the CI workflow](.github/workflows/ci.yml).
+The protection settings are kept in [`.github/branch-protection.json`](.github/branch-protection.json)
+and applied with `npm run protect:main`. Branches must be up to date before merging, so the merged
+code is exactly the code that was approved.
+
+**Limit, stated plainly:** this is a one-person repository, and the agent works with the owner's
+GitHub login. Anyone with write access could append a "yes" to the gate log. The controls against
+that are the agent's rules (never record a decision the human did not give, and never merge), the
+public gate log that shows every decision, and the merge button, which only the human presses. A
+team would add a second reviewer with CODEOWNERS.
 
 ## Where everything is
 

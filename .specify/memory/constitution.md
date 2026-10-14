@@ -2,7 +2,8 @@
 Sync Impact Report
 - Version change: 1.2.0 → 1.3.0 (MINOR: workflow adds pull requests with required CI checks)
 - Modified principles: I. No Hand-Written Code — content commits reach main by PR;
-  III. Humans at the Gates — review-gate yes also enforced as the required `human-gate` PR check
+  III. Humans at the Gates — review-gate yes also enforced as the required `human-gate` PR check;
+  agents never merge pull requests
 - Added sections: none (Development Workflow & Gates gains step 6)
 - Removed sections: none
 - Deferred TODOs: none
@@ -39,7 +40,8 @@ Three gates are mandatory around spec-kit, registered in `.specify/extensions.ym
 **plan** (before implement), **implement** (after implement), and **review** (after AI code review).
 A review-gate yes is recorded with a fingerprint of the approved code; `npm run ship` MUST refuse to
 deploy code that changed since that yes. The same check runs as the required `human-gate` pull-request
-check, so unapproved code cannot merge into `main`. Agents MUST NOT record a decision the human did not give.
+check, so unapproved code cannot merge into `main`. Agents MUST NOT merge pull requests;
+the human merges. Agents MUST NOT record a decision the human did not give.
 Rationale: humans decide best by reading, listening, and seeing, not by scanning diffs.
 
 ### IV. Local-First, Then Deploy

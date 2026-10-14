@@ -15,7 +15,8 @@
     "gate:check": "node scripts/gate.mjs check --stage review",
     "qr": "node scripts/make-qr.mjs",
     "check:public": "node scripts/check-public.mjs main",
-    "pr:review": "node scripts/pr-review.mjs"
+    "pr:review": "node scripts/pr-review.mjs",
+    "protect:main": "gh api -X PUT repos/400kelvins/ai-driven-sdlc/branches/main/protection --input .github/branch-protection.json"
   },
   "dependencies": {
     "@slidev/cli": "53.0.0",

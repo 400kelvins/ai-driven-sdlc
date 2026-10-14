@@ -16,11 +16,19 @@ export const STAGES = ['plan', 'implement', 'review']
 // Everything that ships is covered: code, config, and the deck's slides (slides.md, pages/*.md).
 // Planning docs and gate artifacts change after a decision and are not what ships.
 const DOCS_ONLY = /^(_bmad-output|_bmad|specs|\.specify|\.claude|\.agents)\//
+// Gate wiring is covered too: changing which gates run must invalidate an approval.
+const GATE_WIRING = ['.specify/extensions.yml']
 export const isCode = (path) =>
-  !DOCS_ONLY.test(path) && (!path.endsWith('.md') || path === 'slides.md' || path.startsWith('pages/'))
+  GATE_WIRING.includes(path) ||
+  (!DOCS_ONLY.test(path) && (!path.endsWith('.md') || path === 'slides.md' || path.startsWith('pages/')))
 
 const git = (...args) => execFileSync('git', args, { encoding: 'utf8' })
 const lines = (out) => out.split('\n').filter(Boolean)
+
+/** Shipped files with uncommitted or untracked changes. CI hashes the commit, so a decision must too. */
+export function dirtyShipped() {
+  return [...lines(git('diff', 'HEAD', '--name-only')), ...lines(git('ls-files', '--others', '--exclude-standard'))].filter(isCode)
+}
 
 /** Hash of every shipped file in HEAD plus any uncommitted or new changes to them. */
 export function fingerprint() {
@@ -71,6 +79,8 @@ function main(argv) {
     if (!STAGES.includes(args.stage)) return fail(`--stage must be one of ${STAGES.join(', ')}`)
     if (!['yes', 'no'].includes(args.decision)) return fail('--decision must be yes or no')
     if (!args.story) return fail('--story is required')
+    const dirty = dirtyShipped()
+    if (dirty.length) return fail(`Commit shipped files before recording a decision, so CI sees the same code:\n  ${dirty.join('\n  ')}`)
     const entry = {
       at: new Date().toISOString(),
       stage: args.stage,

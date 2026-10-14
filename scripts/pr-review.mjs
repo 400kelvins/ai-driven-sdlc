@@ -6,10 +6,12 @@ import { execFileSync } from 'node:child_process'
 import { pathToFileURL } from 'node:url'
 
 export const MARKER = '## AI code review'
+// The review workflow posts as the Actions bot; anyone else's comment with the marker is ignored
+export const REVIEWERS = ['github-actions', 'github-actions[bot]']
 
-/** Body of the newest comment that starts with the marker, or null. */
+/** Body of the newest marked comment by the review bot, or null. */
 export function latestReview(comments) {
-  const marked = comments.filter((c) => c.body.trimStart().startsWith(MARKER))
+  const marked = comments.filter((c) => REVIEWERS.includes(c.author?.login) && c.body.trimStart().startsWith(MARKER))
   marked.sort((a, b) => a.createdAt.localeCompare(b.createdAt))
   return marked.at(-1)?.body.trim() ?? null
 }

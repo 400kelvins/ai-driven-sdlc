@@ -1,6 +1,10 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { approved, fingerprint, isCode, parseArgs } from '../../scripts/gate.mjs'
+import { execFileSync } from 'node:child_process'
+import { mkdtempSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { approved, dirtyShipped, fingerprint, isCode, parseArgs } from '../../scripts/gate.mjs'
 
 const yes = (stage, fp, story = '7') => ({ stage, story, decision: 'yes', fingerprint: fp })
 const no = (stage, fp, story = '7') => ({ stage, story, decision: 'no', fingerprint: fp })
@@ -39,10 +43,34 @@ test('parses flags', () => {
 })
 
 test('slides and code ship; planning docs do not', () => {
-  for (const p of ['slides.md', 'pages/talk.md', 'scripts/gate.mjs', 'components/Flow.vue', 'package.json']) {
+  for (const p of ['slides.md', 'pages/talk.md', 'scripts/gate.mjs', 'components/Flow.vue', 'package.json', '.github/workflows/ci.yml', '.specify/extensions.yml']) {
     assert.equal(isCode(p), true, p)
   }
   for (const p of ['_bmad-output/x/gates.jsonl', 'specs/001/spec.md', '.specify/memory/constitution.md', 'README.md', 'public/demo/README.md']) {
     assert.equal(isCode(p), false, p)
   }
+})
+
+// Runs last: it moves this test process into a temp repo
+test('a clean clone fingerprints like the original; dirty shipped files are reported', () => {
+  const run = (dir, ...a) => execFileSync('git', a, { cwd: dir, encoding: 'utf8' })
+  const src = mkdtempSync(join(tmpdir(), 'gate-src-'))
+  run(src, 'init', '-q', '-b', 'main')
+  writeFileSync(join(src, 'a.js'), 'x\n')
+  writeFileSync(join(src, 'notes.md'), 'n\n')
+  run(src, 'add', '.')
+  run(src, '-c', 'user.email=t@example.invalid', '-c', 'user.name=t', 'commit', '-q', '-m', 'a')
+  const clone = join(mkdtempSync(join(tmpdir(), 'gate-clone-')), 'c')
+  execFileSync('git', ['clone', '-q', '--depth', '1', `file://${src}`, clone])
+
+  process.chdir(src)
+  const original = fingerprint()
+  assert.deepEqual(dirtyShipped(), [])
+  writeFileSync('notes.md', 'docs change\n')
+  assert.deepEqual(dirtyShipped(), [])
+  writeFileSync('b.js', 'new\n')
+  assert.deepEqual(dirtyShipped(), ['b.js'])
+
+  process.chdir(clone)
+  assert.equal(fingerprint(), original)
 })

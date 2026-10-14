@@ -69,7 +69,8 @@ Then set `**Decision**:` in the pack to the answer and the date, and commit the 
 
 - **Yes, plan**: continue to implementation.
 - **Yes, implement**: run the review gate next (`/speckit-gate-review`).
-- **Yes, review**: the code is cleared to ship. `npm run ship` checks this gate and deploys only if
+- **Yes, review**: commit and push the gate record to the PR branch so `human-gate` turns green.
+  Never merge the pull request yourself; the human merges. The code is cleared to ship. `npm run ship` checks this gate and deploys only if
   the code has not changed since the yes.
 - **No, any stage**: stop all remaining steps. Report what the human said, and return to Discovery:
   ask what should change, then update the spec with `/speckit-specify` or the Story with `bmad-ticket`.

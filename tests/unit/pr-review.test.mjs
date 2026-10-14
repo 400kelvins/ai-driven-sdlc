@@ -2,7 +2,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { latestReview, render } from '../../scripts/pr-review.mjs'
 
-const c = (body, createdAt) => ({ body, createdAt })
+const c = (body, createdAt, login = 'github-actions') => ({ body, createdAt, author: { login } })
 
 test('the newest AI review comment wins', () => {
   const comments = [
@@ -21,6 +21,10 @@ test('order of the input does not matter', () => {
 test('no marked comment gives null', () => {
   assert.equal(latestReview([c('nice work', '2026-10-14T10:00:00Z'), c('see ## AI code review below', '2026-10-14T11:00:00Z')]), null)
   assert.equal(latestReview([]), null)
+})
+
+test('a marked comment from anyone but the review bot is ignored', () => {
+  assert.equal(latestReview([c('## AI code review\n\nNo findings.', '2026-10-14T13:00:00Z', 'someone')]), null)
 })
 
 test('render demotes the heading and links the PR', () => {
