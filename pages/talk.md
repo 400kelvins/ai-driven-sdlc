@@ -159,7 +159,7 @@ Then I say yes or no. No sends the work back to discovery, not to a bug ticket.
 <div class="grid grid-cols-3 gap-6 mt-8 text-center">
   <div class="p-5 rounded-lg border-2 border-amber-500/60 bg-amber-500/5"><div class="text-xl font-bold">Plan gate</div><div class="op-70 mt-2">before any code</div><div class="text-sm mt-3 op-60">spec-kit prompts</div></div>
   <div class="p-5 rounded-lg border-2 border-amber-500/60 bg-amber-500/5"><div class="text-xl font-bold">Code gate</div><div class="op-70 mt-2">what was built + tests</div><div class="text-sm mt-3 op-60">spec-kit prompts</div></div>
-  <div class="p-5 rounded-lg border-2 border-amber-500 bg-amber-500/15"><div class="text-xl font-bold">Review gate</div><div class="op-70 mt-2">the exact reviewed code</div><div class="text-sm mt-3 font-bold">enforced at ship</div></div>
+  <div class="p-5 rounded-lg border-2 border-amber-500 bg-amber-500/15"><div class="text-xl font-bold">Review gate</div><div class="op-70 mt-2">the exact reviewed code</div><div class="text-sm mt-3 font-bold">enforced at ship + on GitHub</div></div>
 </div>
 
 <div class="mt-8 text-lg">My review yes is recorded with a fingerprint of everything that ships, code and slides. Change one line, and <code>npm run ship</code> stops:</div>
@@ -176,7 +176,71 @@ Be honest about which gates have teeth.
 
 The plan and code gates are prompts: spec-kit tells the agent to stop and ask me. The review gate is enforced: my answer goes into a ledger with a fingerprint of everything that ships, code and slides.
 
-If anyone, human or AI, changes a shipped file after my yes, our ship command refuses to deploy. Someone could still call Vercel directly, and the AI is instructed, not prevented, from answering for me. The ledger makes any of that visible in review. Next step: enforce it in CI too.
+If anyone, human or AI, changes a shipped file after my yes, our ship command refuses to deploy. And since today, GitHub checks the same thing: my yes is a required check on every pull request, so nothing merges without it. The AI is still instructed, not prevented, from answering for me. The public ledger makes that visible.
+-->
+
+---
+
+# Every change is a pull request
+
+<div class="mt-10">
+<Flow :steps="['PR', { label: 'Tests 🔒', kind: 'gate' }, 'AI review 💬<br/><small>diagram first</small>', 'Slide changes 💬<br/><small>before · after</small>', { label: 'My yes 🔒', kind: 'gate' }, 'Merge<br/><small>by me</small>']" />
+</div>
+
+<div class="mt-8 text-2xl text-center"><b>Robots advise. Tests and I decide.</b></div>
+
+<div class="mt-4 text-center op-70">🔒 required check · 💬 advisory comment · the AI never merges</div>
+
+<!--
+This went live this morning, and it's the first thing this pipeline built for itself.
+
+Every change, even my own slide edits, now arrives as a pull request. Two checks are required: the tests, and my review-gate yes for that exact code. The AI review and the slide pictures are comments. They help me decide, but they can't block, and the AI never presses merge. I do.
+-->
+
+---
+
+# Review you can see
+
+<div class="grid grid-cols-2 gap-6 mt-6">
+<div class="text-center">
+<div class="op-70 mb-2">Before</div>
+<img src="/pr-demo/slide3-before.png" class="rounded border border-gray-400/40" />
+</div>
+<div class="text-center">
+<div class="op-70 mb-2">After</div>
+<img src="/pr-demo/slide3-after.png" class="rounded border border-gray-400/40" />
+</div>
+</div>
+
+<div class="mt-6 text-lg">Pull request #6 changed one word. The bot posted <b>"1 of 21 slides changed"</b> and only this pair. The AI review opens with a diagram.</div>
+
+<!--
+Reading, listening, and now seeing.
+
+On every pull request, CI photographs every slide before and after, and shows me only the ones that changed. This test PR changed one word, and the comment showed exactly this slide. One of twenty-one.
+
+The AI review now starts with a diagram of the change. I look at pictures first, and read code only if something looks wrong.
+-->
+
+---
+
+# When I said No
+
+<div class="grid grid-cols-4 gap-4 mt-10 text-center">
+  <div class="p-4 rounded-lg border-2 border-indigo-400/60 bg-indigo-500/10">Quiz<br/><b>passed ✅</b></div>
+  <div class="p-4 rounded-lg border-2 border-amber-500 bg-amber-500/15"><b>"No.</b><br/>I didn't understand."</div>
+  <div class="p-4 rounded-lg border-2 border-indigo-400/60 bg-indigo-500/10">An analogy<br/>+ a diagram</div>
+  <div class="p-4 rounded-lg border-2 border-indigo-400/60 bg-indigo-500/10">Then<br/><b>yes</b></div>
+</div>
+
+<div class="mt-10 text-2xl text-center">A passed quiz is not understanding.</div>
+
+<!--
+Here's the honest moment.
+
+At the review gate for the pull request workflow, I answered the quiz correctly. And then I said no. I didn't understand what I was approving.
+
+The AI didn't push. It explained it again with an analogy and a picture, and then I said yes. That No is the most important thing in the ledger. It's the human doing the one job that's left.
 -->
 
 ---
@@ -262,6 +326,27 @@ Now the honest part.
 Review fatigue is real. You can feel faster without being faster. PRs get bigger and reviews take longer.
 
 That's exactly why the gate matters, and why it has to be readable, listenable, and visual. If the human gate is a 2,000-line diff, you lose.
+-->
+
+---
+
+# Next: install it in your repo
+
+<div class="grid grid-cols-2 gap-x-12 gap-y-5 mt-10 text-xl text-left">
+  <div>📦 <b>One command</b> into any existing repo</div>
+  <div>🤖 <b>Claude Code and Codex</b> on day one</div>
+  <div>🗣 <b>Spoken review</b> with diagrams and a quiz</div>
+  <div>🔒 <b>Your yes</b> as a required check on GitHub</div>
+</div>
+
+<div class="mt-10 text-2xl text-center">No yes without understanding.</div>
+
+<!--
+Everything you've seen is being turned into a package you can install into your own repository.
+
+One command, and it works with Claude Code or Codex. It teaches you the flow, reads you the review, shows you the diagram, asks you questions, and enforces your yes on GitHub.
+
+The rule I took from that No: you can't approve what you don't understand.
 -->
 
 ---
