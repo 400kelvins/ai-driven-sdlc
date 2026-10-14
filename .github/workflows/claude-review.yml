@@ -20,12 +20,14 @@ jobs:
   review:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    # Read-only: whatever the model does, this job cannot write to the repository or the PR
     permissions:
       contents: read
-      pull-requests: write
+      pull-requests: read
+    outputs:
+      skipped: ${{ steps.secret.outputs.reason }}
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      PR: ${{ github.event.pull_request.number }}
       REVIEW_FILE: ${{ github.workspace }}/ai-review.md
     steps:
       - id: secret
@@ -81,26 +83,59 @@ jobs:
             --allowedTools "Read,Grep,Glob,Write,Bash(gh pr diff:*),Bash(gh pr view:*)"
             --disallowedTools "WebFetch,WebSearch,Bash(env:*),Bash(printenv:*),Bash(curl:*),Bash(gh pr comment:*),Bash(gh api:*)"
 
-      # The model may write files in the workspace. No step after it may run repository code.
-      - name: Post the review as one comment (updated in place)
-        if: always() && github.event.pull_request.head.repo.full_name == github.repository
+      # Hand the result to the post job as an artifact. The model never runs in that job.
+      - name: Collect the review, or the reviewer's error
+        if: always() && steps.secret.outputs.present == 'true'
         env:
-          REPO: ${{ github.repository }}
-          SKIPPED: ${{ steps.secret.outputs.reason }}
           EXECUTION_FILE: ${{ steps.claude.outputs.execution_file }}
+        run: |
+          mkdir -p out
+          if [ -s "$REVIEW_FILE" ]; then cp "$REVIEW_FILE" out/review.md
+          else jq -r '[.[] | select(.type == "result")] | last | .result // empty' "$EXECUTION_FILE" 2>/dev/null | head -c 500 > out/error.txt || true
+          fi
+
+      - if: always() && steps.secret.outputs.present == 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ai-review
+          path: out/
+          retention-days: 7
+
+  post:
+    # A fresh runner with no model: the only job allowed to write to the PR
+    needs: review
+    if: always() && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      pull-requests: write
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      REPO: ${{ github.repository }}
+      PR: ${{ github.event.pull_request.number }}
+      SKIPPED: ${{ needs.review.outputs.skipped }}
+    steps:
+      - if: needs.review.outputs.skipped == ''
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        continue-on-error: true
+        with:
+          name: ai-review
+          path: out
+
+      - name: Post the review as one comment (updated in place)
         run: |
           body=$(mktemp)
           if [ -n "$SKIPPED" ]; then
             printf '## AI code review\n\n_Skipped: %s._\n' "$SKIPPED" > "$body"
-          elif [ ! -s "$REVIEW_FILE" ]; then
-            # Quote the reviewer's own error (for example an API error) so the gate pack shows why
-            reason=$(jq -r '[.[] | select(.type == "result")] | last | .result // empty' "$EXECUTION_FILE" 2>/dev/null | head -c 500)
-            printf '## AI code review\n\n_The reviewer produced no review: %s_\n' "${reason:-see the workflow run}" > "$body"
+          elif [ -s out/review.md ]; then
+            { echo '## AI code review'; echo; grep -v '^## AI code review$' out/review.md; } > "$body"
           else
-            { echo '## AI code review'; echo; grep -v '^## AI code review$' "$REVIEW_FILE"; } > "$body"
+            # Quote the reviewer's own error (for example an API error) so the gate pack shows why
+            reason=$(cat out/error.txt 2>/dev/null)
+            printf '## AI code review\n\n_The reviewer produced no review: %s_\n' "${reason:-see the workflow run}" > "$body"
           fi
           # Last line of defence: never publish anything that looks like a token
-          if grep -Eq 'sk-ant-[a-z0-9]+-[A-Za-z0-9_-]{20,}|gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}' "$body"; then
+          if grep -Eq 'sk-ant-[A-Za-z0-9_-]{20,}|gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}' "$body"; then
             printf '## AI code review\n\n_Withheld: the review contained a token-like string._\n' > "$body"
           fi
           id=$(gh api "repos/$REPO/issues/$PR/comments" --paginate \

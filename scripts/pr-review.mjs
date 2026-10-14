@@ -11,7 +11,7 @@ export const REVIEWERS = ['github-actions', 'github-actions[bot]']
 
 /** Body of the newest marked comment by the review bot, or null. */
 export function latestReview(comments) {
-  const marked = comments.filter((c) => REVIEWERS.includes(c.author?.login) && c.body.trimStart().startsWith(MARKER))
+  const marked = comments.filter((c) => REVIEWERS.includes(c.author?.login) && c.body.startsWith(MARKER))
   marked.sort((a, b) => a.createdAt.localeCompare(b.createdAt))
   return marked.at(-1)?.body.trim() ?? null
 }

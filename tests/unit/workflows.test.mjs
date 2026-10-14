@@ -81,6 +81,15 @@ test('AI review skips forks and a missing secret visibly, and is not a required 
   assert.ok(!jobs(review).some((j) => ['verify', 'human-gate'].includes(j)))
 })
 
+test('the model runs in a read-only job; only a separate model-free job writes to the PR', () => {
+  const doc = parseDocument(review).toJS()
+  assert.deepEqual(doc.jobs.review.permissions, { contents: 'read', 'pull-requests': 'read' })
+  assert.deepEqual(doc.jobs.post.permissions, { 'pull-requests': 'write' })
+  assert.equal(doc.jobs.post.needs, 'review')
+  assert.ok(!doc.jobs.post.steps.some((s) => String(s.uses ?? '').includes('claude-code-action')))
+  assert.ok(!doc.jobs.post.steps.some((s) => String(s.uses ?? '').includes('actions/checkout')))
+})
+
 test('the model cannot publish: no comment or API tool; a shell step posts after a token scan', () => {
   const allowed = review.match(/--allowedTools "([^"]+)"/)[1]
   assert.doesNotMatch(allowed, /gh pr comment|gh api|Bash\(\*|WebFetch/)
