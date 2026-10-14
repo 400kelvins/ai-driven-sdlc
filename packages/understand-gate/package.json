@@ -1,0 +1,20 @@
+{
+  "name": "understand-gate",
+  "version": "0.0.0",
+  "description": "No yes without understanding: human review gates for AI-written code",
+  "type": "module",
+  "bin": {
+    "understand-gate": "bin/understand-gate.mjs"
+  },
+  "files": [
+    "bin",
+    "src"
+  ],
+  "engines": {
+    "node": ">=20.12"
+  },
+  "scripts": {
+    "test": "node --test \"tests/*.test.mjs\""
+  },
+  "license": "MIT"
+}
