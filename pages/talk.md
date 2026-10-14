@@ -4,7 +4,7 @@ layout: center
 
 # The AI-Driven SDLC
 
-Same stages. Different depth of AI.
+Same stages. Deeper AI.
 
 <!--
 Let's start with where most teams are today, then where this deck was built.
