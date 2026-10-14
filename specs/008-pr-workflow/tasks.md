@@ -38,12 +38,12 @@
 
 ## Phase 6: Live (after the implement gate; outward-facing)
 
-- [ ] T013 Human: run `claude setup-token`, then `gh secret set CLAUDE_CODE_OAUTH_TOKEN`
-- [ ] T014 Push branch; open PR "Story 11: PR workflow" with `Closes #1`; confirm `verify` ✅ and `human-gate` ❌ (no yes yet)
-- [ ] T015 Apply branch protection on `main` per research R9 (`gh api -X PUT .../branches/main/protection`); confirm a direct push to `main` is rejected
-- [ ] T016 Confirm the AI review comment appears; review gate runs with `npm run pr:review` in its pack
-- [ ] T017 After review yes: push the `docs:` gate commit; confirm `human-gate` ✅; human merges; issue #1 closes
-- [ ] T018 On `main`: `npm run ship` and the deploy log pack
+- [X] T013 Human: run `claude setup-token`, then `gh secret set CLAUDE_CODE_OAUTH_TOKEN` (replaced by `ANTHROPIC_API_KEY` + `ANTHROPIC_WORKSPACE_ID`; see deploy pack)
+- [X] T014 Push branch; open PR "Story 11: PR workflow" with `Closes #1`; confirm `verify` ✅ and `human-gate` ❌ (no yes yet)
+- [X] T015 Apply branch protection on `main` per research R9 (`gh api -X PUT .../branches/main/protection`); confirm a direct push to `main` is rejected
+- [X] T016 Confirm the AI review comment appears; review gate runs with `npm run pr:review` in its pack
+- [X] T017 After review yes: push the `docs:` gate commit; confirm `human-gate` ✅; human merges; issue #1 closes
+- [X] T018 On `main`: `npm run ship` and the deploy log pack
 
 ## Dependencies
 

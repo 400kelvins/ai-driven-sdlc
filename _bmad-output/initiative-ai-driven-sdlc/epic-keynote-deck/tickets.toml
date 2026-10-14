@@ -122,3 +122,27 @@ after = [7]
 hitl = true
 risk = "medium"
 notes = ["Approved at Story 7 review gate, 2026-10-12: yes, after publish"]
+
+[[entry]]
+id = 12
+type = "story"
+title = "Visual PRs: a diagram and screenshots on every PR"
+description = "Every pull request shows the reviewer what changed without reading code: the AI review includes a Mermaid diagram of the change, and CI posts before/after screenshots of changed slides inline. Images live on a pr-assets branch so main stays clean."
+verify = "A PR comment shows a diagram and before/after screenshots of every changed slide; main has no screenshot files; the model never holds write access."
+covers = []
+after = [11]
+hitl = true
+risk = "medium"
+references = ["GitHub issue #3", "Decision 2026-10-14: screenshots stored on a pr-assets branch"]
+
+[[entry]]
+id = 13
+type = "story"
+title = "Slides show the PR workflow, visual PRs, and the package roadmap"
+description = "New slides with speaker notes covering Story 11 (PR workflow, required checks, advisory AI review), Story 12 (visual PRs), the review-gate No that passed the quiz, and the installable package PRD."
+verify = "New slides render offline with speaker notes; facts match the repo; no secrets or personal email."
+covers = []
+after = [11, 12]
+hitl = true
+risk = "low"
+references = ["GitHub issue #4"]

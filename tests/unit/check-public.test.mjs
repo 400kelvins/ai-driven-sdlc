@@ -12,7 +12,7 @@ const fakeGhToken = () => 'ghp_' + 'a'.repeat(36)
 const fakeKeyHeader = () => '-'.repeat(5) + 'BEGIN OPENSSH PRIVATE' + ' KEY' + '-'.repeat(5)
 
 test('only allowed noreply addresses pass', () => {
-  assert.deepEqual(badEmails(`${NOREPLY}\nnoreply@anthropic.com\n`), [])
+  assert.deepEqual(badEmails(`${NOREPLY}\nnoreply@anthropic.com\nnoreply@github.com\n41898282+github-actions[bot]@users.noreply.github.com\n`), [])
   assert.deepEqual(badEmails(`${NOREPLY}\nsomeone@gmail.com\n`), ['someone@gmail.com'])
 })
 

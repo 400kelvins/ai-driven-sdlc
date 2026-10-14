@@ -1,0 +1,228 @@
+# Slide screenshots on every pull request (spec 009). Advisory: not a required check.
+#
+# `shots` builds and runs the PR's code, so it can only read. It photographs every slide at the
+# PR's base and head and keeps the slides that look different. `publish` runs none of the PR's
+# code: it validates that artifact, stores the images on the `pr-assets` branch (never main), and
+# posts one comment built only from validated numbers.
+name: PR visuals
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-visuals-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  shots:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - id: fork
+        env:
+          SAME_REPO: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
+        run: |
+          # A fork's token cannot write, so there would be nothing to publish
+          if [ "$SAME_REPO" = "true" ]; then echo "run=true" >> "$GITHUB_OUTPUT"; exit 0; fi
+          echo "::warning::Slide screenshots skipped: pull request from a fork"
+          echo "Slide screenshots skipped: pull request from a fork" >> "$GITHUB_STEP_SUMMARY"
+
+      - if: steps.fork.outputs.run == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          path: head
+          persist-credentials: false
+
+      - if: steps.fork.outputs.run == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: base
+          persist-credentials: false
+
+      - if: steps.fork.outputs.run == 'true'
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            head/package-lock.json
+            base/package-lock.json
+
+      - name: Install the head deck and Chromium
+        if: steps.fork.outputs.run == 'true'
+        working-directory: head
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+
+      # If main itself does not build, the comment shows after images only
+      - name: Photograph the base deck
+        if: steps.fork.outputs.run == 'true'
+        continue-on-error: true
+        working-directory: base
+        run: |
+          npm ci
+          npx slidev --port 3031 > ../base-dev.log 2>&1 &
+          up=false; for i in $(seq 1 60); do curl -sf http://localhost:3031 > /dev/null && up=true && break; sleep 2; done
+          [ "$up" = true ] || { echo "::warning::Base deck did not start"; exit 1; }
+          # Keep the base shots only if every slide was photographed
+          node ../head/scripts/slide-shots.mjs http://localhost:3031 ../shots/base-partial
+          mv ../shots/base-partial ../shots/base
+
+      - name: Photograph the head deck
+        if: steps.fork.outputs.run == 'true'
+        working-directory: head
+        run: |
+          npx slidev --port 3032 > ../head-dev.log 2>&1 &
+          up=false; for i in $(seq 1 60); do curl -sf http://localhost:3032 > /dev/null && up=true && break; sleep 2; done
+          [ "$up" = true ] || { echo "::error::Head deck did not start"; cat ../head-dev.log; exit 1; }
+          node scripts/slide-shots.mjs http://localhost:3032 ../shots/head
+
+      - name: Keep only the slides that changed
+        if: steps.fork.outputs.run == 'true'
+        run: node head/scripts/slide-diff.mjs shots/base shots/head out
+
+      - if: steps.fork.outputs.run == 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: slide-shots
+          path: out/
+          retention-days: 7
+
+  publish:
+    # A fresh runner that never checks out or runs PR code: the only job allowed to write
+    needs: shots
+    if: ${{ !cancelled() && github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      pull-requests: write
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      REPO: ${{ github.repository }}
+      PR: ${{ github.event.pull_request.number }}
+      SHA: ${{ github.event.pull_request.head.sha }}
+    steps:
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        continue-on-error: true
+        with:
+          name: slide-shots
+          path: art
+
+      # The artifact came from a job that ran PR code, so it is untrusted: accept only PNG images
+      # with numeric names, capped in number and size, that match a manifest of integers and fixed
+      # words. Unit-tested by running this block on crafted folders (tests/unit/workflows.test.mjs).
+      - name: Validate the artifact
+        id: check
+        run: |
+          ok=false
+          m=art/manifest.json
+          if [ -f "$m" ] && [ ! -L "$m" ] && [ "$(wc -c < "$m")" -le 65536 ] && jq -e '
+              (.total | type == "number" and . == floor and . >= 0 and . <= 999)
+              and (.baseMissing | type == "boolean")
+              and (.changes | type == "array" and length <= 999)
+              and all(.changes[]; (.slide | type == "number" and . == floor and . >= 1 and . <= 999)
+                                  and (.kind | IN("changed", "new", "removed"))
+                                  and (keys == ["kind", "slide"]))' "$m" > /dev/null; then
+            ok=true
+            count=0
+            bytes=0
+            for f in art/* art/.[!.]*; do
+              [ -e "$f" ] || [ -L "$f" ] || continue
+              name=$(basename "$f")
+              [ "$name" = manifest.json ] && continue
+              if ! [[ "$name" =~ ^[0-9]{3}-(before|after)\.png$ ]] || [ -L "$f" ] || [ ! -f "$f" ] \
+                || [ "$(wc -c < "$f")" -gt 2097152 ] \
+                || [ "$(head -c 8 "$f" | od -An -tx1 | tr -d ' \n')" != "89504e470d0a1a0a" ]; then
+                echo "::error::Invalid artifact file: $name"; ok=false; continue
+              fi
+              count=$((count + 1))
+              bytes=$((bytes + $(wc -c < "$f")))
+            done
+            # The images must be exactly the ones the manifest names
+            expected=$(jq -r '.changes[] | (.slide | tostring | ("00" + .) | .[-3:]) as $p
+              | (if .kind != "new" then "\($p)-before.png" else empty end),
+                (if .kind != "removed" then "\($p)-after.png" else empty end)' "$m" | sort)
+            actual=$(cd art && ls -1A | grep -v '^manifest\.json$' | sort)
+            if [ "$expected" != "$actual" ]; then echo "::error::Artifact images do not match the manifest"; ok=false; fi
+            if [ "$count" -gt 40 ] || [ "$bytes" -gt 52428800 ]; then echo "::error::Artifact too large"; ok=false; fi
+          fi
+          echo "ok=$ok" >> "$GITHUB_OUTPUT"
+
+      - name: Store the images on the pr-assets branch
+        id: store
+        if: steps.check.outputs.ok == 'true'
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          images=(art/[0-9][0-9][0-9]-*.png)
+          if [ ${#images[@]} -eq 0 ]; then echo "stored=none" >> "$GITHUB_OUTPUT"; exit 0; fi
+          gh auth setup-git
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          remote="https://github.com/$REPO.git"
+          # Each attempt starts from a fresh copy, so a concurrent push (including two PRs creating
+          # the branch at once) is retried on top of whatever won
+          for attempt in 1 2 3; do
+            rm -rf assets
+            # Exit 2 means the branch does not exist yet; any other failure is a real error
+            found=0
+            git ls-remote --exit-code --heads "$remote" pr-assets > /dev/null || found=$?
+            if [ "$found" -eq 0 ]; then
+              git clone --quiet --depth 1 --branch pr-assets "$remote" assets
+            elif [ "$found" -eq 2 ]; then
+              git init --quiet -b pr-assets assets
+              git -C assets remote add origin "$remote"
+            else
+              echo "::error::Could not reach the repository"; exit 1
+            fi
+            mkdir -p "assets/pr-$PR/$SHA"
+            cp "${images[@]}" "assets/pr-$PR/$SHA/"
+            git -C assets add -A
+            # A re-run of the same commit produces the same images: already stored
+            if git -C assets diff --cached --quiet; then echo "stored=yes" >> "$GITHUB_OUTPUT"; exit 0; fi
+            git -C assets commit --quiet -m "PR #$PR: slide screenshots for ${SHA:0:7}"
+            if git -C assets push --quiet origin pr-assets; then echo "stored=yes" >> "$GITHUB_OUTPUT"; exit 0; fi
+            sleep $((attempt * 3))
+          done
+          echo "::error::Could not push to pr-assets"; exit 1
+
+      - name: Post the slide comment (updated in place)
+        if: ${{ !cancelled() }}
+        env:
+          OK: ${{ steps.check.outputs.ok }}
+          STORED: ${{ steps.store.outputs.stored }}
+        run: |
+          body=$(mktemp)
+          url="https://raw.githubusercontent.com/$REPO/pr-assets/pr-$PR/$SHA"
+          if [ "$OK" = "true" ] && { [ "$STORED" = "yes" ] || [ "$STORED" = "none" ]; }; then
+            jq -r --arg url "$url" --arg sha "${SHA:0:7}" '
+              def pad: tostring | ("00" + .) | .[-3:];
+              def img($side): "![\($side)](\($url)/\(.slide | pad)-\($side).png)";
+              (.changes | length) as $n
+              | "## Slide changes\n",
+                (if $n == 0 then "_Commit \($sha) · No slide changed._"
+                 else "_Commit \($sha) · \($n) of \(.total) slides changed._" end),
+                (if .baseMissing then "\n_Before images missing: the base did not build._" else empty end),
+                (if $n > 0 then "\n| Slide | Before | After |\n|---|---|---|" else empty end),
+                (.changes[:10][]
+                  | "| \(.slide) | \(if .kind == "new" then "—" else img("before") end) | \(if .kind == "removed" then "—" else img("after") end) |"),
+                (if $n > 10 then "\n_+\($n - 10) more changed (only the first 10 are shown)._" else empty end)
+            ' art/manifest.json > "$body"
+          else
+            printf '## Slide changes\n\n_Screenshots could not be made: see the workflow run._\n' > "$body"
+          fi
+          id=$(gh api "repos/$REPO/issues/$PR/comments" --paginate \
+            --jq '.[] | select(.user.login == "github-actions[bot]" and (.body | startswith("## Slide changes"))) | .id' | tail -n 1)
+          if [ -n "$id" ]; then gh api -X PATCH "repos/$REPO/issues/comments/$id" -F "body=@$body" > /dev/null
+          else gh api "repos/$REPO/issues/$PR/comments" -F "body=@$body" > /dev/null; fi

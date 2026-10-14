@@ -1,25 +1,33 @@
 #!/usr/bin/env node
-// Prints the pull request's AI code review as Markdown for the review-gate Gate Review Pack.
+// Prints the pull request's AI code review and slide changes as Markdown for the review-gate Gate Review Pack.
 //
 //   node scripts/pr-review.mjs [<pr-number>]    # default: the open PR for the current branch
 import { execFileSync } from 'node:child_process'
 import { pathToFileURL } from 'node:url'
 
 export const MARKER = '## AI code review'
-// The review workflow posts as the Actions bot; anyone else's comment with the marker is ignored
+export const SLIDES_MARKER = '## Slide changes'
+// The workflows post as the Actions bot; anyone else's comment with a marker is ignored
 export const REVIEWERS = ['github-actions', 'github-actions[bot]']
 
-/** Body of the newest marked comment by the review bot, or null. */
-export function latestReview(comments) {
-  const marked = comments.filter((c) => REVIEWERS.includes(c.author?.login) && c.body.startsWith(MARKER))
+/** Body of the newest comment by the Actions bot that starts with this marker, or null. */
+export function latestComment(comments, marker) {
+  const marked = comments.filter((c) => REVIEWERS.includes(c.author?.login) && c.body.startsWith(marker))
   marked.sort((a, b) => a.createdAt.localeCompare(b.createdAt))
   return marked.at(-1)?.body.trim() ?? null
 }
 
+export const latestReview = (comments) => latestComment(comments, MARKER)
+
 export function render({ number, url, comments }) {
-  const review = latestReview(comments)
-  const body = review ? review.replace(/^## /, '### ') : '_No AI review comment yet._'
-  return `**PR**: #${number} ${url}\n\n${body}\n`
+  const demote = (body) => body.replace(/^## /, '### ')
+  const review = latestComment(comments, MARKER)
+  const slides = latestComment(comments, SLIDES_MARKER)
+  return [
+    `**PR**: #${number} ${url}`,
+    review ? demote(review) : '_No AI review comment yet._',
+    slides ? demote(slides) : '_No slide changes comment yet._',
+  ].join('\n\n') + '\n'
 }
 
 function main(argv) {
