@@ -14,7 +14,9 @@
     "gate:record": "node scripts/gate.mjs record",
     "gate:check": "node scripts/gate.mjs check --stage review",
     "qr": "node scripts/make-qr.mjs",
-    "check:public": "node scripts/check-public.mjs main"
+    "check:public": "node scripts/check-public.mjs main",
+    "pr:review": "node scripts/pr-review.mjs",
+    "protect:main": "gh api -X PUT repos/{owner}/{repo}/branches/main/protection --input .github/branch-protection.json"
   },
   "dependencies": {
     "@slidev/cli": "53.0.0",
@@ -24,7 +26,8 @@
     "@playwright/test": "1.63.0",
     "jsqr": "1.4.0",
     "pngjs": "7.0.0",
-    "qrcode": "1.5.4"
+    "qrcode": "1.5.4",
+    "yaml": "2.9.1"
   },
   "engines": {
     "node": "22.x"

@@ -2,3 +2,7 @@
 {"at":"2026-10-12T20:44:25.170Z","stage":"plan","story":"7","decision":"yes","fingerprint":"2fa4ed76bd8449f9","commit":"93ba6fc","note":"license Apache-2.0"}
 {"at":"2026-10-12T20:48:18.545Z","stage":"implement","story":"7","decision":"yes","fingerprint":"4ac95b040ce3109e","commit":"1da099e"}
 {"at":"2026-10-12T20:53:13.661Z","stage":"review","story":"7","decision":"yes","fingerprint":"52327a67d4b4249b","commit":"8fb9908","note":"publish memlog publicly; Story 11 PR workflow after publish"}
+{"at":"2026-10-14T07:05:59.526Z","stage":"plan","story":"11","decision":"yes","fingerprint":"52327a67d4b4249b","commit":"cdc634f"}
+{"at":"2026-10-14T07:08:57.312Z","stage":"implement","story":"11","decision":"yes","fingerprint":"6b4134448469efd4","commit":"a7a00c3"}
+{"at":"2026-10-14T08:27:04.572Z","stage":"review","story":"11","decision":"no","fingerprint":"e37a7b4279bdd750","commit":"935f2ae"}
+{"at":"2026-10-14T08:29:48.548Z","stage":"review","story":"11","decision":"yes","fingerprint":"e37a7b4279bdd750","commit":"795e485","note":"after re-explanation: two-key safe, AI review runs on GitHub"}

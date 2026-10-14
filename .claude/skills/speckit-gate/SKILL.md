@@ -32,6 +32,12 @@ sentences: no tables, symbols, or code. Fill the rest by stage:
 | `implement` | after `/speckit-implement` | Tasks done vs planned, `npm run verify` result (unit, e2e, build, notes leak), `git diff --stat` since the plan gate, estimate vs actual, anything skipped |
 | `review` | after `implement` is approved | AI code review of the diff (spawn a reviewer agent; severity-tagged findings), each finding with Fixed / Deferred / Ignored and why, verify result after fixes |
 
+For `review`, also run `npm run pr:review` and paste its output under a `## AI review on the PR`
+heading. That is the reviewer comment GitHub posted on the branch's pull request. Merge its findings
+into the findings table, and say when there is no PR or no comment yet. The PR's required checks are
+`verify` and `human-gate`. `human-gate` turns green only after this gate's yes is committed and
+pushed to the PR branch.
+
 For `review`, fix what the human would expect fixed **before** presenting, then rerun `npm run verify`.
 The review gate approves the exact code as it stands, so present only after the last code change.
 
@@ -63,7 +69,8 @@ Then set `**Decision**:` in the pack to the answer and the date, and commit the 
 
 - **Yes, plan**: continue to implementation.
 - **Yes, implement**: run the review gate next (`/speckit-gate-review`).
-- **Yes, review**: the code is cleared to ship. `npm run ship` checks this gate and deploys only if
+- **Yes, review**: commit and push the gate record to the PR branch so `human-gate` turns green.
+  Never merge the pull request yourself; the human merges. The code is cleared to ship. `npm run ship` checks this gate and deploys only if
   the code has not changed since the yes.
 - **No, any stage**: stop all remaining steps. Report what the human said, and return to Discovery:
   ask what should change, then update the spec with `/speckit-specify` or the Story with `bmad-ticket`.

@@ -1,8 +1,10 @@
 <!--
 Sync Impact Report
-- Version change: 1.1.0 → 1.2.0 (MINOR: Principle III adds mandatory plan/implement/review gates and ship enforcement)
-- Modified principles: III. Humans at the Gates — named gates, ledger, ship check
-- Added sections: none
+- Version change: 1.2.0 → 1.3.0 (MINOR: workflow adds pull requests with required CI checks)
+- Modified principles: I. No Hand-Written Code — content commits reach main by PR;
+  III. Humans at the Gates — review-gate yes also enforced as the required `human-gate` PR check;
+  agents never merge pull requests
+- Added sections: none (Development Workflow & Gates gains step 6)
 - Removed sections: none
 - Deferred TODOs: none
 -->
@@ -19,6 +21,8 @@ code or configuration by hand.
 `pages/*.md` by hand, locally. Such edits MUST stay within Markdown text and `<!-- -->` notes —
 no Vue components, scripts, styles, or frontmatter changes. Content edits are committed with the
 prefix `content:` so the git history separates human content from AI code.
+Content commits are made on a branch and reach `main` through a pull request like any other
+change.
 
 Rationale: the talk claims an AI-built product with zero hand-written code; the repo is the proof.
 The talk's words and notes stay in the presenter's own voice.
@@ -35,7 +39,9 @@ read-aloud. The human answers yes or no. Yes advances the Story; no returns the 
 Three gates are mandatory around spec-kit, registered in `.specify/extensions.yml`:
 **plan** (before implement), **implement** (after implement), and **review** (after AI code review).
 A review-gate yes is recorded with a fingerprint of the approved code; `npm run ship` MUST refuse to
-deploy code that changed since that yes. Agents MUST NOT record a decision the human did not give.
+deploy code that changed since that yes. The same check runs as the required `human-gate` pull-request
+check, so unapproved code cannot merge into `main`. Agents MUST NOT merge pull requests;
+the human merges. Agents MUST NOT record a decision the human did not give.
 Rationale: humans decide best by reading, listening, and seeing, not by scanning diffs.
 
 ### IV. Local-First, Then Deploy
@@ -66,7 +72,11 @@ fonts or scripts required to render. Rationale: venue Wi-Fi is unreliable.
 3. AI agent tests the Story against its verify line.
 4. AI code review; findings summarized and read aloud.
 5. Gate Review Pack → human yes/no.
-6. Local verification → Vercel deploy → deploy-log check.
+6. Pull request into `main`. Branch protection requires CI checks `verify` (`npm run verify`) and
+   `human-gate` (`npm run gate:check` at the PR head), applies them to administrators, and blocks
+   force pushes. An AI review comment is posted on each PR; it is advisory and feeds the review
+   Gate Review Pack.
+7. Merge (does not deploy) → `npm run ship` on `main` → deploy-log check.
 
 ## Governance
 
@@ -75,4 +85,4 @@ This constitution supersedes other practices in this repo. Amendments are made t
 MINOR: principle or section added; PATCH: wording). Every plan's Constitution Check MUST confirm
 Principles I–VI; any deviation MUST be justified in the plan's Complexity Tracking.
 
-**Version**: 1.2.0 | **Ratified**: 2026-10-12 | **Last Amended**: 2026-10-12
+**Version**: 1.3.0 | **Ratified**: 2026-10-12 | **Last Amended**: 2026-10-14
