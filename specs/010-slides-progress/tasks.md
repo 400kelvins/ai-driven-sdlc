@@ -25,6 +25,6 @@
 
 ## Phase 5: Live (after the implement gate)
 
-- [ ] T009 Open a PR with `Closes #4`. The slide changes comment shows the new slides and the edited one.
+- [X] T009 Open a PR with `Closes #4`. The slide changes comment shows the new slides and the edited one.
 - [ ] T010 Review gate. After a yes, push the gate commit. The human merges.
 - [ ] T011 On `main`: `npm run ship` and the deploy log pack
