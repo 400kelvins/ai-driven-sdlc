@@ -86,5 +86,9 @@ test('the model cannot publish: no comment or API tool; a shell step posts after
   assert.doesNotMatch(allowed, /gh pr comment|gh api|Bash\(\*|WebFetch/)
   assert.match(review, /--disallowedTools "[^"]*Bash\(gh pr comment:\*\)/)
   assert.match(review, /grep -Eq 'sk-ant-/)
+  // The guard matches real token shapes, not a review that quotes the pattern itself
+  const guard = new RegExp(review.match(/grep -Eq '([^']+)' "\$body"/)[1])
+  assert.ok(guard.test('sk-ant-api03-' + 'x'.repeat(30)))
+  assert.ok(!guard.test("grep -Eq 'sk-ant-|gh[pousr]_'"))
   assert.match(review, /printf '## AI code review/)
 })

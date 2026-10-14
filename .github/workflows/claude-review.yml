@@ -99,7 +99,7 @@ jobs:
             { echo '## AI code review'; echo; grep -v '^## AI code review$' "$REVIEW_FILE"; } > "$body"
           fi
           # Last line of defence: never publish anything that looks like a token
-          if grep -Eq 'sk-ant-|gh[pousr]_[A-Za-z0-9]{20,}' "$body"; then
+          if grep -Eq 'sk-ant-[a-z0-9]+-[A-Za-z0-9_-]{20,}|gh[pousr]_[A-Za-z0-9]{20,}' "$body"; then
             printf '## AI code review\n\n_Withheld: the review contained a token-like string._\n' > "$body"
           fi
           id=$(gh api "repos/$REPO/issues/$PR/comments" --paginate \
