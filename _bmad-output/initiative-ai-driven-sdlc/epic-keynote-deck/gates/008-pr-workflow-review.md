@@ -1,6 +1,6 @@
 # Review gate: Story 11, PR workflow
 
-**PR**: [#2](https://github.com/400kelvins/ai-driven-sdlc/pull/2) · **Issue**: #1 · **Date**: 2026-10-14 · **Decision**: no (2026-10-14, presenter)
+**PR**: [#2](https://github.com/400kelvins/ai-driven-sdlc/pull/2) · **Issue**: #1 · **Date**: 2026-10-14 · **Decision**: no, then yes after re-explanation (2026-10-14, presenter)
 
 ## Summary (read aloud)
 
