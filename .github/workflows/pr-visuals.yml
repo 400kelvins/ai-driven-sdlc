@@ -153,7 +153,7 @@ jobs:
             expected=$(jq -r '.changes[] | (.slide | tostring | ("00" + .) | .[-3:]) as $p
               | (if .kind != "new" then "\($p)-before.png" else empty end),
                 (if .kind != "removed" then "\($p)-after.png" else empty end)' "$m" | sort)
-            actual=$(cd art && ls -1 | grep -v '^manifest\.json$' | sort)
+            actual=$(cd art && ls -1A | grep -v '^manifest\.json$' | sort)
             if [ "$expected" != "$actual" ]; then echo "::error::Artifact images do not match the manifest"; ok=false; fi
             if [ "$count" -gt 40 ] || [ "$bytes" -gt 52428800 ]; then echo "::error::Artifact too large"; ok=false; fi
           fi

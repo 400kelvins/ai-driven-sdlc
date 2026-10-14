@@ -196,6 +196,7 @@ test('artifact check rejects anything else', () => {
   assert.equal(validate(pair), 'ok=false', 'no manifest')
   assert.equal(validate({ ...pair, 'evil.sh': 'echo pwned' }, { manifest: one }), 'ok=false', 'extra file')
   assert.equal(validate({ ...pair, '.hidden': 'x' }, { manifest: one }), 'ok=false', 'hidden file')
+  assert.equal(validate({ ...pair, '..x': 'x' }, { manifest: one }), 'ok=false', 'double-dot hidden file')
   assert.equal(validate({ '003-before.png': PNG, '003-after.png': 'not a png' }, { manifest: one }), 'ok=false', 'bad signature')
   assert.equal(validate({ '003-before.png': PNG, '003-after.png': 'LINK' }, { manifest: one }), 'ok=false', 'symlinked image')
   assert.equal(validate(pair, { manifest: one, symlinkManifest: true }), 'ok=false', 'symlinked manifest')
