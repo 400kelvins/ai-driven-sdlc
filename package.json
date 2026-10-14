@@ -14,7 +14,8 @@
     "gate:record": "node scripts/gate.mjs record",
     "gate:check": "node scripts/gate.mjs check --stage review",
     "qr": "node scripts/make-qr.mjs",
-    "check:public": "node scripts/check-public.mjs main"
+    "check:public": "node scripts/check-public.mjs main",
+    "pr:review": "node scripts/pr-review.mjs"
   },
   "dependencies": {
     "@slidev/cli": "53.0.0",
