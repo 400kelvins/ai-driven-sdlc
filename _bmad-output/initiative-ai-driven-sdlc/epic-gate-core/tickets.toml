@@ -1,0 +1,81 @@
+[[entry]]
+id = 1
+type = "story"
+title = "Package workspace and per-scope fingerprints"
+description = "Adds npm workspaces with packages/understand-gate, a CLI, and .understand-gate/config.json with deck and package scopes; `understand-gate fingerprint --scope <s>` hashes only that scope's files."
+verify = "Changing a slide changes the deck fingerprint and leaves the package fingerprint unchanged, and the reverse; node:test covers both."
+covers = ["E2 (AD-3)", "UG-FR-21"]
+after = []
+hitl = false
+risk = "low"
+references = ["architecture-sdlc-blueprint-package/architecture-sdlc-blueprint-package.md#ad-3"]
+
+[[entry]]
+id = 2
+type = "story"
+title = "Ledger v2 and check every touched scope"
+description = "Adds .understand-gate/gates.jsonl in the AD-4 shape with record, check over every scope touched between merge base and head, and a local `stats` command for first-try pass rate."
+verify = "A diff touching both scopes fails check until both have a matching review yes; `stats` prints first-try rate from a fixture ledger."
+covers = ["UG-FR-21", "UG-FR-22", "UG-CM-2"]
+after = [1]
+hitl = false
+risk = "medium"
+references = ["architecture-sdlc-blueprint-package/architecture-sdlc-blueprint-package.md#ad-4"]
+
+[[entry]]
+id = 3
+type = "story"
+title = "CI runs the checker and config from main, with path filters"
+description = "The human-gate job runs the understand-gate checker and config from the base branch against the PR head; deck jobs run only on deck changes and package jobs only on package changes; CODEOWNERS covers .github/ and .understand-gate/."
+verify = "A throwaway PR that edits config.json to drop the package scope while changing package code fails human-gate; a deck-only PR skips package jobs."
+covers = ["UG-FR-22"]
+after = [2]
+hitl = true
+risk = "high"
+references = ["architecture-sdlc-blueprint-package/architecture-sdlc-blueprint-package.md#ad-2"]
+
+[[entry]]
+id = 4
+type = "story"
+title = "Proof of a human yes: PR comment or signed commit"
+description = "check accepts a ledger yes only with proof: a `/understand-gate yes <scope> <fingerprint>` comment by a login in config.reviewers (default), or a signed commit in strict mode; docs state the comment-mode limit."
+verify = "In CI, a ledger yes with no matching comment fails; adding the comment from the presenter's account passes; a comment from another login fails."
+covers = ["UG-FR-27"]
+after = [3]
+hitl = true
+risk = "high"
+references = ["architecture-sdlc-blueprint-package/architecture-sdlc-blueprint-package.md#ad-5"]
+
+[[entry]]
+id = 5
+type = "story"
+title = "Release script and read-listen-see alias"
+description = "`npm run release -w understand-gate` runs package tests, checks a package-scope review yes, bumps the version, tags understand-gate@x.y.z, and stops; packages/read-listen-see delegates to it."
+verify = "Running release on a clean main produces a tag and a version bump and prints the npm publish command without running it."
+covers = ["E2 (AD-10)"]
+after = [2]
+hitl = true
+risk = "medium"
+references = ["architecture-sdlc-blueprint-package/architecture-sdlc-blueprint-package.md#ad-10"]
+
+[[entry]]
+id = 6
+type = "story"
+title = "This repo dogfoods understand-gate; scripts/gate.mjs retired"
+description = "Switches gate:record, gate:check, ship, the speckit-gate skills, and CI to understand-gate, migrates the old ledger lines into scopes, and removes scripts/gate.mjs."
+verify = "`npm run ship` passes on main with no reference to scripts/gate.mjs left in the repo."
+covers = ["E2 (AD-10)", "UG-FR-22"]
+after = [4, 5]
+hitl = true
+risk = "high"
+
+[[entry]]
+id = 7
+type = "story"
+title = "Refactor sweep"
+description = "Cleanup deferred from entries 1-6; scope set when it starts from their plans and review findings."
+verify = "npm run verify passes and every deferred finding is closed or recorded."
+covers = []
+after = [1, 2, 3, 4, 5, 6]
+hitl = false
+risk = "low"

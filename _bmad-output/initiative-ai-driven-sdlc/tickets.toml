@@ -3,3 +3,30 @@ id = 1
 slug = "epic-keynote-deck"
 title = "AI-built Keynote-style deck for the AI-Driven SDLC talk"
 covers = ["FR-1", "FR-2", "FR-3", "FR-4", "FR-6", "FR-7", "FR-8", "FR-9", "FR-14", "FR-15", "FR-16", "FR-17", "FR-18", "FR-19"]
+
+[[epic]]
+id = 2
+slug = "epic-gate-core"
+title = "understand-gate gate core, enforced on GitHub and used by this repo"
+covers = ["UG-FR-21", "UG-FR-22", "UG-FR-27", "UG-CM-2"]
+
+[[epic]]
+id = 3
+slug = "epic-install"
+title = "npx understand-gate installs into any GitHub repo"
+covers = ["UG-FR-1", "UG-FR-2", "UG-FR-3", "UG-FR-4", "UG-FR-8", "UG-FR-11", "UG-FR-25", "UG-FR-28"]
+after = [{ epic = 2, needs = "the gate core, ledger, and CI templates to copy" }]
+
+[[epic]]
+id = 4
+slug = "epic-review-experience"
+title = "Hear, see, quiz: a review you understand before you say yes"
+covers = ["UG-FR-12", "UG-FR-13", "UG-FR-14", "UG-FR-15", "UG-FR-16", "UG-FR-17", "UG-FR-18", "UG-FR-19", "UG-FR-20", "UG-FR-23", "UG-FR-24", "UG-FR-26"]
+after = [{ epic = 3, needs = "the installer to ship packs, speakers, and skills" }]
+
+[[epic]]
+id = 5
+slug = "epic-onboarding"
+title = "First ten minutes: tour, demo story, and intent to GitHub issue"
+covers = ["UG-FR-5", "UG-FR-6", "UG-FR-7", "UG-FR-9", "UG-FR-10"]
+after = [{ epic = 4, needs = "a working review for the demo story to pass through" }]
