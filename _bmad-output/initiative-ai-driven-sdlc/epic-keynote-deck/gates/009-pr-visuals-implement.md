@@ -4,7 +4,7 @@
 
 ## Summary (read aloud)
 
-Story twelve is built and every test passes. Two new scripts photograph every slide and keep only the ones that changed. In a local test, two runs of the same deck found zero changes, and a one-word edit found exactly slide three. A new workflow posts those before and after pictures on the pull request, and the AI review now starts with a diagram. While checking, the public scan found your work email in the merge commit GitHub made for pull request two. A clean replacement commit is ready, and it needs your three commands.
+Story twelve is built and every test passes. Two new scripts photograph every slide and keep only the ones that changed. In a local test, two runs of the same deck found zero changes, and a one-word edit found exactly slide three. A new workflow posts those before and after pictures on the pull request, and the AI review now starts with a diagram. While checking, the public scan found your work email in the merge commit GitHub made for pull request two. You chose to leave that history as it is.
 
 ## Proof it works (local)
 
@@ -56,4 +56,4 @@ flowchart LR
 
 ## Not done yet
 
-- Live phase (T014–T017) runs **after** `main` is rewritten. It needs your three `!` commands.
+- Live phase (T014–T017): PR, throwaway one-slide PR, review gate, your merge, ship.
