@@ -9,6 +9,8 @@ import { pathToFileURL } from 'node:url'
 export const ALLOWED_EMAILS = [
   /^\d+\+400kelvins@users\.noreply\.github\.com$/,
   /^noreply@anthropic\.com$/, // Co-Authored-By trailer for Claude
+  /^noreply@github\.com$/, // GitHub's committer address for merges made on github.com
+  /^41898282\+github-actions\[bot\]@users\.noreply\.github\.com$/, // CI commits (pr-assets branch)
 ]
 export const SECRET_PATTERNS = [
   /gh[pousr]_[A-Za-z0-9]{30,}/,

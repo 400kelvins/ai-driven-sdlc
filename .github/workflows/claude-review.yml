@@ -74,6 +74,10 @@ jobs:
             3. Secrets, tokens, or personal email addresses in code, config, or commit messages.
             4. Workflow safety: pinned action versions, least permissions, secrets only via `secrets.*`.
 
+            Start with a diagram before the findings: a fenced ```mermaid flowchart of what the change
+            does, showing the parts it touches and how they connect, at most 15 nodes. Use plain
+            words for node labels. For a trivial change, one node is enough.
+
             Tag each finding 🔴 critical, 🟡 medium, or 🔵 minor, with file:line and a one-line fix.
             If there is nothing to report, say "No findings."
 

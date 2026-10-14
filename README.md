@@ -50,7 +50,14 @@ them to administrators as well, and blocks direct pushes and force pushes:
 |---|---|---|
 | `verify` | yes | `npm run verify`: unit tests, end-to-end tests, build, and the speaker-notes leak check |
 | `human-gate` | yes | `npm run gate:check` on the PR's head commit. It passes only when the latest review-gate decision is yes and matches the exact shipped code. |
-| AI review | no | The [Claude GitHub Action](.github/workflows/claude-review.yml) posts an `## AI code review` comment. `npm run pr:review` pulls it into the review-gate pack. |
+| AI review | no | The [Claude GitHub Action](.github/workflows/claude-review.yml) posts an `## AI code review` comment that opens with a Mermaid diagram of the change. `npm run pr:review` pulls it into the review-gate pack. |
+| Slide changes | no | [PR visuals](.github/workflows/pr-visuals.yml) photographs every slide at the PR's base and head and posts a `## Slide changes` comment with before/after images of only the slides that look different, or "No slide changed". |
+
+The slide images are stored on a separate `pr-assets` branch (`pr-<number>/<commit>/`), never on
+`main`. The job that runs the PR's code can only read; a second job, which runs none of it, checks
+that the result holds only PNG images and numbers, then saves the images and posts the comment.
+Run it locally with `npm run dev`, then `npm run shots -- http://localhost:3030 <dir>` and
+`node scripts/slide-diff.mjs <before-dir> <after-dir> <out-dir>`.
 
 GitHub does not let authors approve their own pull requests, so the human approval is a CI check
 backed by the gate log rather than a GitHub review. The flow is: open the PR, the AI reviews it,
