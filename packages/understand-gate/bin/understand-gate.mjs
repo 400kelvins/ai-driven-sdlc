@@ -10,9 +10,9 @@
 // Exit codes: 0 pass, 1 failure, 2 usage. Errors are one line on stderr.
 import { parseArgs } from '../src/args.mjs'
 import { fingerprint } from '../src/fingerprint.mjs'
-import { changedSince, git, repoRoot } from '../src/git.mjs'
-import { appendLines, approval, decisionLines, readLedger } from '../src/ledger.mjs'
-import { inScope, loadConfig } from '../src/scopes.mjs'
+import { changedSince, git, isShallow, repoRoot, showAt } from '../src/git.mjs'
+import { LEDGER, appendLines, approval, assertAppendOnly, decisionLines, readLedger } from '../src/ledger.mjs'
+import { CONFIG, inScope, loadConfig, parseConfig } from '../src/scopes.mjs'
 import { formatStats, stats } from '../src/stats.mjs'
 
 const USAGE =
@@ -35,6 +35,9 @@ const COMMANDS = {
   },
 
   record(root, { scopes }, args) {
+    for (const flag of ['scope', 'stage', 'story', 'decision', 'attempts', 'first-try', 'confidence', 'note']) {
+      if (args[flag] === true) throw new Error(`--${flag} needs a value`)
+    }
     const names = pickScopes(scopes, String(args.scope ?? '').split(',').filter(Boolean))
     if (!names.length) throw new Error('--scope is required')
     // Validate the answer before touching git, so bad input fails fast and alone
@@ -48,11 +51,20 @@ const COMMANDS = {
     for (const l of lines) console.log(`Recorded ${l.stage} ${l.decision} for ${l.scope}, story ${l.story} (${l.fingerprint})`)
   },
 
-  check(root, { scopes }, args) {
-    if (args.all !== true && typeof args.base !== 'string') throw new Usage()
+  check(root, config, args) {
+    const all = args.all === true && args.base === undefined
+    if (!all && (typeof args.base !== 'string' || args.all !== undefined)) throw new Usage()
+    let { scopes } = config
     let names = Object.keys(scopes)
-    if (args.all !== true) {
+    if (!all) {
+      // A shallow clone can hide the real merge base, and with it the files a branch changed
+      if (isShallow(root)) throw new Error('shallow clone: fetch full history (actions/checkout fetch-depth: 0) before check --base')
       const base = git(root, 'merge-base', args.base, 'HEAD').trim()
+      // A branch must not judge itself: scopes and earlier decisions come from where it started (AD-2, AD-4)
+      const baseConfig = showAt(root, base, CONFIG)
+      if (baseConfig !== null) scopes = parseConfig(baseConfig, `${CONFIG} at ${args.base}`).scopes
+      names = Object.keys(scopes)
+      assertAppendOnly(root, showAt(root, base, LEDGER))
       const changed = changedSince(root, base)
       names = names.filter((n) => changed.some((path) => inScope(path, scopes[n])))
       if (!names.length) {

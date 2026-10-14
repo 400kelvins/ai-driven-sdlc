@@ -25,3 +25,13 @@ export function changedSince(root, ref) {
     ...entries(git(root, 'ls-files', '-z', '--others', '--exclude-standard')),
   ]
 }
+
+/** A file's text at a commit, or null when the commit does not have it. */
+export function showAt(root, ref, path) {
+  const listed = entries(git(root, 'ls-tree', '-z', '--name-only', ref, '--', path))
+  return listed.length ? git(root, 'show', `${ref}:${path}`) : null
+}
+
+export function isShallow(root) {
+  return git(root, 'rev-parse', '--is-shallow-repository').trim() === 'true'
+}

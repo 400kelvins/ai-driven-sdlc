@@ -14,12 +14,26 @@ export function readLedger(root) {
     .map((line, i) => [line, i + 1])
     .filter(([line]) => line.trim())
     .map(([line, n]) => {
+      let entry
       try {
-        return JSON.parse(line)
+        entry = JSON.parse(line)
       } catch {
         throw new Error(`${LEDGER} line ${n}: not valid JSON`)
       }
+      const shaped =
+        entry !== null && typeof entry === 'object' && !Array.isArray(entry) &&
+        ['scope', 'stage', 'story', 'decision', 'fingerprint'].every((k) => typeof entry[k] === 'string')
+      if (!shaped) throw new Error(`${LEDGER} line ${n}: needs scope, stage, story, decision, and fingerprint as text`)
+      return entry
     })
+}
+
+/** Append-only: the ledger at the base must be the exact start of the ledger now. */
+export function assertAppendOnly(root, baseText) {
+  if (baseText === null) return
+  const file = join(root, LEDGER)
+  const now = existsSync(file) ? readFileSync(file, 'utf8') : ''
+  if (!now.startsWith(baseText)) throw new Error(`${LEDGER}: earlier lines were changed or removed; the ledger is append-only`)
 }
 
 /**
@@ -57,7 +71,10 @@ export function decisionLines({ stage, story, decision, attempts, firstTry, conf
 export function appendLines(root, lines) {
   const file = join(root, LEDGER)
   mkdirSync(dirname(file), { recursive: true })
-  appendFileSync(file, lines.map((l) => JSON.stringify(l) + '\n').join(''))
+  // A write cut short leaves no newline; start on a fresh line so the next read still works
+  const text = existsSync(file) ? readFileSync(file, 'utf8') : ''
+  const lead = text && !text.endsWith('\n') ? '\n' : ''
+  appendFileSync(file, lead + lines.map((l) => JSON.stringify(l) + '\n').join(''))
 }
 
 /** The latest review line for each scope must be yes and match its current fingerprint. */
