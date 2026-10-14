@@ -51,7 +51,7 @@ test('slides and code ship; planning docs do not', () => {
   }
 })
 
-// Runs last: it moves this test process into a temp repo
+// Moves into temp repos and restores the working directory
 test('a clean clone fingerprints like the original; dirty shipped files are reported', () => {
   const run = (dir, ...a) => execFileSync('git', a, { cwd: dir, encoding: 'utf8' })
   const src = mkdtempSync(join(tmpdir(), 'gate-src-'))
@@ -63,14 +63,19 @@ test('a clean clone fingerprints like the original; dirty shipped files are repo
   const clone = join(mkdtempSync(join(tmpdir(), 'gate-clone-')), 'c')
   execFileSync('git', ['clone', '-q', '--depth', '1', `file://${src}`, clone])
 
-  process.chdir(src)
-  const original = fingerprint()
-  assert.deepEqual(dirtyShipped(), [])
-  writeFileSync('notes.md', 'docs change\n')
-  assert.deepEqual(dirtyShipped(), [])
-  writeFileSync('b.js', 'new\n')
-  assert.deepEqual(dirtyShipped(), ['b.js'])
+  const home = process.cwd()
+  try {
+    process.chdir(src)
+    const original = fingerprint()
+    assert.deepEqual(dirtyShipped(), [])
+    writeFileSync('notes.md', 'docs change\n')
+    assert.deepEqual(dirtyShipped(), [])
+    writeFileSync('b.js', 'new\n')
+    assert.deepEqual(dirtyShipped(), ['b.js'])
 
-  process.chdir(clone)
-  assert.equal(fingerprint(), original)
+    process.chdir(clone)
+    assert.equal(fingerprint(), original)
+  } finally {
+    process.chdir(home)
+  }
 })

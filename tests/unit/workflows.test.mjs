@@ -89,6 +89,7 @@ test('the model cannot publish: no comment or API tool; a shell step posts after
   // The guard matches real token shapes, not a review that quotes the pattern itself
   const guard = new RegExp(review.match(/grep -Eq '([^']+)' "\$body"/)[1])
   assert.ok(guard.test('sk-ant-api03-' + 'x'.repeat(30)))
+  assert.ok(guard.test('github_pat_' + 'y'.repeat(30)))
   assert.ok(!guard.test("grep -Eq 'sk-ant-|gh[pousr]_'"))
   assert.match(review, /printf '## AI code review/)
 })

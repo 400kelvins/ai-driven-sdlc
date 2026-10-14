@@ -78,9 +78,10 @@ jobs:
             Write the review to the file ${{ github.workspace }}/ai-review.md. Its first line must be
             exactly `## AI code review`. Do not post it; a later step does.
           claude_args: |
-            --allowedTools "Read,Grep,Glob,Write,Bash(gh pr diff:*),Bash(gh pr view:*),Bash(git diff:*),Bash(git log:*)"
+            --allowedTools "Read,Grep,Glob,Write,Bash(gh pr diff:*),Bash(gh pr view:*)"
             --disallowedTools "WebFetch,WebSearch,Bash(env:*),Bash(printenv:*),Bash(curl:*),Bash(gh pr comment:*),Bash(gh api:*)"
 
+      # The model may write files in the workspace. No step after it may run repository code.
       - name: Post the review as one comment (updated in place)
         if: always() && github.event.pull_request.head.repo.full_name == github.repository
         env:
@@ -99,7 +100,7 @@ jobs:
             { echo '## AI code review'; echo; grep -v '^## AI code review$' "$REVIEW_FILE"; } > "$body"
           fi
           # Last line of defence: never publish anything that looks like a token
-          if grep -Eq 'sk-ant-[a-z0-9]+-[A-Za-z0-9_-]{20,}|gh[pousr]_[A-Za-z0-9]{20,}' "$body"; then
+          if grep -Eq 'sk-ant-[a-z0-9]+-[A-Za-z0-9_-]{20,}|gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}' "$body"; then
             printf '## AI code review\n\n_Withheld: the review contained a token-like string._\n' > "$body"
           fi
           id=$(gh api "repos/$REPO/issues/$PR/comments" --paginate \
