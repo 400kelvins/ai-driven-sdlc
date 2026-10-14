@@ -1,0 +1,26 @@
+{
+  "scopes": {
+    "deck": {
+      "include": ["**"],
+      "exclude": [
+        "packages/**",
+        "_bmad-output/**",
+        "_bmad/**",
+        "specs/**",
+        ".specify/**",
+        ".claude/**",
+        ".agents/**",
+        ".understand-gate/**",
+        "**/*.md",
+        "!slides.md",
+        "!pages/**/*.md",
+        "!.specify/extensions.yml",
+        "!.understand-gate/config.json"
+      ]
+    },
+    "package": {
+      "include": ["packages/understand-gate/**"],
+      "exclude": []
+    }
+  }
+}

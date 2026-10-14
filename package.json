@@ -6,7 +6,7 @@
     "dev": "slidev --port 3030",
     "build": "slidev build --without-notes",
     "test": "playwright test",
-    "test:unit": "node --test \"tests/unit/*.test.mjs\"",
+    "test:unit": "node --test \"tests/unit/*.test.mjs\" \"packages/*/tests/*.test.mjs\"",
     "review:speak": "node scripts/speak.mjs",
     "check:notes": "node scripts/check-notes-leak.mjs",
     "verify": "npm run test:unit && npm test && npm run build && npm run check:notes",
@@ -32,5 +32,8 @@
   },
   "engines": {
     "node": "22.x"
-  }
+  },
+  "workspaces": [
+    "packages/*"
+  ]
 }
