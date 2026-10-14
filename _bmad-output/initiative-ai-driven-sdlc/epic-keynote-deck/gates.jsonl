@@ -6,3 +6,4 @@
 {"at":"2026-10-14T07:08:57.312Z","stage":"implement","story":"11","decision":"yes","fingerprint":"6b4134448469efd4","commit":"a7a00c3"}
 {"at":"2026-10-14T08:27:04.572Z","stage":"review","story":"11","decision":"no","fingerprint":"e37a7b4279bdd750","commit":"935f2ae"}
 {"at":"2026-10-14T08:29:48.548Z","stage":"review","story":"11","decision":"yes","fingerprint":"e37a7b4279bdd750","commit":"795e485","note":"after re-explanation: two-key safe, AI review runs on GitHub"}
+{"at":"2026-10-14T13:13:58.559Z","stage":"plan","story":"12","decision":"yes","fingerprint":"e37a7b4279bdd750","commit":"45007cb","note":"quiz first answered wrong (all slides), re-explained; wants the changed slides only"}
