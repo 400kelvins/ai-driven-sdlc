@@ -76,3 +76,12 @@
 - **When**: After this PR's checks have run once, so the check names exist, and before merge. This
   PR is then the first change to pass through it.
 - **Consequence**: From then on, gate-record commits and `content:` edits reach `main` only by PR.
+
+## R10. Live finding: subscription token rejected (2026-10-14)
+
+- **Finding**: On PR #2 the reviewer failed with `API Error: 400 This API key is not scoped to a
+  workspace, so this request must include the anthropic-workspace-id header`. The `setup-token`
+  OAuth token came from an organization login that requires a workspace.
+- **Decision (presenter)**: Use a Console API key as the secret `ANTHROPIC_API_KEY`, passed as
+  `anthropic_api_key`. It is billed per use, and it supersedes R4's OAuth choice. The old
+  `CLAUDE_CODE_OAUTH_TOKEN` secret is no longer used.

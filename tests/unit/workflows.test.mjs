@@ -64,7 +64,7 @@ test('branch protection requires both checks, up to date, for admins too', () =>
 
 test('AI review uses the pinned action and the token only from secrets', () => {
   assert.match(review, /uses: anthropics\/claude-code-action@[0-9a-f]{40} # v1\.0\.237/)
-  assert.match(review, /claude_code_oauth_token: \$\{\{ secrets\.CLAUDE_CODE_OAUTH_TOKEN \}\}/)
+  assert.match(review, /anthropic_api_key: \$\{\{ secrets\.ANTHROPIC_API_KEY \}\}/)
   assert.doesNotMatch(review, /sk-ant-[A-Za-z0-9_-]{10,}/)
 })
 
