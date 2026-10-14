@@ -48,6 +48,7 @@ jobs:
           persist-credentials: false
 
       - if: steps.secret.outputs.present == 'true'
+        id: claude
         uses: anthropics/claude-code-action@fd1c128679612beff4ca259c78021c506e8aa7a7 # v1.0.237
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -82,16 +83,21 @@ jobs:
         env:
           REPO: ${{ github.repository }}
           SKIPPED: ${{ steps.secret.outputs.reason }}
+          EXECUTION_FILE: ${{ steps.claude.outputs.execution_file }}
         run: |
           body=$(mktemp)
           if [ -n "$SKIPPED" ]; then
             printf '## AI code review\n\n_Skipped: %s._\n' "$SKIPPED" > "$body"
           elif [ ! -s "$REVIEW_FILE" ]; then
-            printf '## AI code review\n\n_The reviewer produced no review. See the workflow run._\n' > "$body"
-          elif grep -Eq 'sk-ant-|gh[pousr]_[A-Za-z0-9]{20,}' "$REVIEW_FILE"; then
-            printf '## AI code review\n\n_Withheld: the review contained a token-like string._\n' > "$body"
+            # Quote the reviewer's own error (for example an API error) so the gate pack shows why
+            reason=$(jq -r '[.[] | select(.type == "result")] | last | .result // empty' "$EXECUTION_FILE" 2>/dev/null | head -c 500)
+            printf '## AI code review\n\n_The reviewer produced no review: %s_\n' "${reason:-see the workflow run}" > "$body"
           else
             { echo '## AI code review'; echo; grep -v '^## AI code review$' "$REVIEW_FILE"; } > "$body"
+          fi
+          # Last line of defence: never publish anything that looks like a token
+          if grep -Eq 'sk-ant-|gh[pousr]_[A-Za-z0-9]{20,}' "$body"; then
+            printf '## AI code review\n\n_Withheld: the review contained a token-like string._\n' > "$body"
           fi
           id=$(gh api "repos/$REPO/issues/$PR/comments" --paginate \
             --jq '.[] | select(.user.login == "github-actions[bot]" and (.body | startswith("## AI code review"))) | .id' | tail -n 1)
