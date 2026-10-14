@@ -81,8 +81,8 @@
 
 ## Phase 7: Live (after the implement gate; outward-facing)
 
-- [ ] T014 Push the branch; open a PR "Story 12: visual PRs" with `Closes #3`. Confirm the AI review shows a diagram and the slide comment says "No slide changed".
-- [ ] T015 Open a throwaway PR (base `009-pr-visuals`, or main after the merge) that edits one slide's wording. Confirm one before/after pair inline, then close it without merging and delete its branch.
+- [X] T014 Push the branch; open a PR "Story 12: visual PRs" with `Closes #3`. Confirm the AI review shows a diagram and the slide comment says "No slide changed".
+- [X] T015 Open a throwaway PR (base `009-pr-visuals`, or main after the merge) that edits one slide's wording. Confirm one before/after pair inline, then close it without merging and delete its branch.
 - [ ] T016 Review gate with `npm run pr:review` in the pack. After a yes, push the `docs:` gate commit and confirm `human-gate` ✅. The human merges.
 - [ ] T017 On `main`: confirm no `pr-` paths, run `npm run ship`, and write the deploy log pack.
 
