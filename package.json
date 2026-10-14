@@ -16,6 +16,7 @@
     "qr": "node scripts/make-qr.mjs",
     "check:public": "node scripts/check-public.mjs main",
     "pr:review": "node scripts/pr-review.mjs",
+    "shots": "node scripts/slide-shots.mjs",
     "protect:main": "gh api -X PUT repos/{owner}/{repo}/branches/main/protection --input .github/branch-protection.json"
   },
   "dependencies": {
