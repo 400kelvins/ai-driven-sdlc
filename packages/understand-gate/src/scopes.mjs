@@ -25,7 +25,8 @@ function toRegExp(pattern) {
     else if (c === '?') out += '[^/]'
     else out += c.replace(/[.+^${}()|[\]\\]/g, '\\$&')
   }
-  return new RegExp(`^${out}$`)
+  // s: `.` also matches newlines, so ** covers every file name git can hold
+  return new RegExp(`^${out}$`, 's')
 }
 
 export function matches(pattern, path) {
@@ -44,6 +45,16 @@ export function inScope(path, scope) {
   return !excluded
 }
 
+// Unsupported gitignore forms would silently match nothing, leaving a scope that never changes.
+function patternProblem(pattern) {
+  if (typeof pattern !== 'string' || !pattern.replace(/^!/, '')) return 'must be a non-empty string'
+  const body = pattern.replace(/^!/, '')
+  if (body.startsWith('/')) return 'must not start with /; patterns are already relative to the repo root'
+  if (body.endsWith('/')) return 'must not end with /; use dir/** for a folder'
+  if (/[[\]]/.test(body)) return 'uses [ ], which is not supported'
+  return ''
+}
+
 /** Reads and checks the config; throws an Error with a one-line message. */
 export function loadConfig(cwd = process.cwd()) {
   let config
@@ -59,6 +70,10 @@ export function loadConfig(cwd = process.cwd()) {
   for (const [name, scope] of Object.entries(scopes)) {
     const valid = Array.isArray(scope?.include) && (scope.exclude === undefined || Array.isArray(scope.exclude))
     if (!valid) throw new Error(`${CONFIG}: scope "${name}" needs an "include" list and an optional "exclude" list`)
+    for (const pattern of [...scope.include, ...(scope.exclude ?? [])]) {
+      const problem = patternProblem(pattern)
+      if (problem) throw new Error(`${CONFIG}: scope "${name}" pattern ${JSON.stringify(pattern)} ${problem}`)
+    }
   }
   return config
 }

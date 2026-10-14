@@ -13,7 +13,7 @@
         ".understand-gate/**",
         "**/*.md",
         "!slides.md",
-        "!pages/*.md",
+        "!pages/**/*.md",
         "!.specify/extensions.yml",
         "!.understand-gate/config.json"
       ]
