@@ -1,6 +1,6 @@
 # Gate Review Pack — Review gate: Story 2.5, release script and read-listen-see alias
 
-**PR**: [#21](https://github.com/400kelvins/ai-driven-sdlc/pull/21) · **Issue**: #20 · **Date**: 2026-10-15 · **Decision**: yes (2026-10-15, presenter reviewed the PR; quiz passed first try)
+**PR**: [#21](https://github.com/400kelvins/ai-driven-sdlc/pull/21) · **Issue**: #20 · **Date**: 2026-10-15 · **Decision**: yes (2026-10-15, presenter reviewed the PR; quiz passed first try; re-approved after the base-config fix, quiz first try)
 
 ## Summary (read aloud)
 

@@ -29,3 +29,4 @@
 {"at":"2026-10-15T11:23:50.210Z","stage":"plan","story":"2.5","decision":"yes","fingerprint":"0115555acbafd0ed","commit":"3190d77","note":"quiz passed first try"}
 {"at":"2026-10-15T11:27:52.111Z","stage":"implement","story":"2.5","decision":"yes","fingerprint":"22ed82c9102ed8a5","commit":"8186c6a","note":"quiz passed first try"}
 {"at":"2026-10-15T11:33:36.380Z","stage":"review","story":"2.5","decision":"yes","fingerprint":"bc32345877bfc79e","commit":"e60a732","note":"presenter reviewed PR #21; local AI review fixed (plain versions, origin match, remote tag, rollback, alias signals, exports); quiz passed first try"}
+{"at":"2026-10-15T11:37:29.122Z","stage":"review","story":"2.5","decision":"yes","fingerprint":"cb6fad5af6454e2d","commit":"94ac3c8","note":"re-approved after record/fingerprint use main's config; quiz passed first try"}
