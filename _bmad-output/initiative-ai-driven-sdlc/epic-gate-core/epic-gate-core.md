@@ -54,3 +54,4 @@ The gate core and its CI wiring, inside this repo. Not the installer into other 
 - Decision: old and new gates run side by side until entry 6 (architecture AD-10).
 - Decision: proof of a human yes is a PR comment from the presenter (comment mode); signed-commit and bot-account modes deferred. The presenter knows an agent using the same login could post it (presenter, 2026-10-15).
 - Decision: understand-gate check runs on pull_request_target from main (presenter chose option A, 2026-10-15).
+- Decision: proof comment simplified to a plain "yes" posted after the latest push (option A); the quiz stays in chat. Copying fingerprints was too complicated (presenter, 2026-10-15). Entry 8.

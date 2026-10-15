@@ -79,3 +79,15 @@ covers = []
 after = [1, 2, 3, 4, 5, 6]
 hitl = false
 risk = "low"
+
+[[entry]]
+id = 8
+type = "story"
+title = "Simple yes: a plain 'yes' comment after the latest push"
+description = "Replaces the scope-and-fingerprint comment lines with a plain 'yes' comment from a listed reviewer, accepted only when posted after the pull request's latest push; the understanding check stays the chat quiz."
+verify = "On a live PR, a 'yes' comment posted after the last push turns understand-gate green with no push; a push after the comment turns it red again."
+covers = ["UG-FR-27"]
+after = [4]
+hitl = true
+risk = "medium"
+notes = ["this is too complicated for users, it should be quizz based and not copying complicated commands on github"]
