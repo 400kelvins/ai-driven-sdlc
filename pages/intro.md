@@ -55,3 +55,27 @@ Every feature in it went through an AI-driven lifecycle: I spoke the requirement
 
 My job was to decide. Hold that thought, we'll come back to it.
 -->
+
+---
+
+# Hi, I'm Gaurav Sehrawat
+
+<div class="text-2xl op-80 -mt-2">Solution architect and consultant · fintech</div>
+
+<div class="relative mt-6">
+<img src="/me/linkedin.png" alt="Gaurav Sehrawat's LinkedIn profile" class="h-72 rounded-lg border border-gray-400/40 shadow" />
+<div class="absolute top-0 right-0 text-center">
+<img src="/qr/linkedin.svg" alt="QR code to Gaurav Sehrawat's LinkedIn" class="w-40 h-40 bg-white p-1 rounded" />
+<div class="text-sm op-70 mt-1">Scan to connect</div>
+</div>
+</div>
+
+<div class="absolute bottom-8 left-0 right-0 text-center text-xl">linkedin.com/in/igauravsehrawat</div>
+
+<!--
+A little about me.
+
+I'm Gaurav. I'm a solution architect and consultant, and I work in fintech. I design how teams build and ship software, and lately, how they do it with AI.
+
+If you want to continue the conversation after the talk, scan the code, or find me on LinkedIn.
+-->
