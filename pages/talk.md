@@ -53,6 +53,94 @@ Humans sit at three gates in the build. Point at the amber boxes: the plan gate 
 -->
 
 ---
+
+# Specs, not prompts
+
+<div class="grid grid-cols-2 gap-10 mt-8">
+<div class="p-5 rounded-lg border-2 border-gray-400/50">
+<div class="text-xl font-bold mb-3">Prompting</div>
+<div class="text-lg leading-loose op-80">
+A chat you can't review<br/>
+Lost when the window closes<br/>
+Different answer every time<br/>
+The AI guesses the rest
+</div>
+</div>
+<div class="p-5 rounded-lg border-2 border-indigo-400/60 bg-indigo-500/10">
+<div class="text-xl font-bold mb-3">Spec-driven</div>
+<div class="text-lg leading-loose">
+📄 One source of truth for people and agents<br/>
+🔍 Reviewed <b>before</b> any code exists<br/>
+🔁 Repeatable: same spec, same plan<br/>
+🎯 Small, focused tasks for the AI<br/>
+🧭 Traceable: idea → story → spec → PR → deploy
+</div>
+</div>
+</div>
+
+<!--
+Why specs instead of prompts?
+
+A prompt is a conversation. You can't review it, it's gone when the window closes, and the AI fills every gap with a guess.
+
+A spec is a document. My team and the agent read the same thing. I can review it before a single line of code exists, which is the cheapest moment to catch a wrong idea. It gives the AI small, focused tasks. And everything traces back: from the idea, to the story, to the spec, to the pull request, to the deploy.
+-->
+
+---
+
+# BMad for the PRD, spec-kit to build
+
+<div class="grid grid-cols-2 gap-10 mt-10">
+<div class="p-5 rounded-lg border-2 border-indigo-400/60 bg-indigo-500/10">
+<div class="text-2xl font-bold">BMad Method</div>
+<div class="op-70 mb-4">the <b>what</b> and the <b>why</b></div>
+<div class="text-lg leading-loose">PRD · architecture<br/>epics · stories</div>
+</div>
+<div class="p-5 rounded-lg border-2 border-indigo-400/60 bg-indigo-500/10">
+<div class="text-2xl font-bold">GitHub spec-kit</div>
+<div class="op-70 mb-4">the <b>how</b></div>
+<div class="text-lg leading-loose">spec · plan · tasks<br/>implement</div>
+</div>
+</div>
+
+<div class="mt-10 text-xl text-center">🎙 Idea → <b>BMad</b> story → <b>spec-kit</b> spec → code, with a gate between each step</div>
+
+<!--
+Two tools, two jobs.
+
+BMad Method does the product thinking: the PRD, the architecture, and the stories. It answers what we're building and why.
+
+GitHub's spec-kit does the engineering: for each story, a spec, a plan, and a task list, and then the implementation. It answers how.
+
+So an idea I speak becomes a BMad story, the story becomes a spec-kit spec, and the spec becomes code. And between each step, there's a gate.
+-->
+
+---
+
+# What is a gate?
+
+<div class="mt-6 text-2xl text-center">The point where <b>I show I understand</b>, before the work moves on.</div>
+
+<div class="grid grid-cols-3 gap-6 mt-10 text-center">
+  <div class="p-4 rounded-lg border-2 border-amber-500 bg-amber-500/15"><b>Plan gate</b><div class="mt-2">Do I understand what will be built?</div></div>
+  <div class="p-4 rounded-lg border-2 border-amber-500 bg-amber-500/15"><b>Code gate</b><div class="mt-2">Do I understand what was built?</div></div>
+  <div class="p-4 rounded-lg border-2 border-amber-500 bg-amber-500/15"><b>Review gate</b><div class="mt-2">Do I understand the exact code that ships?</div></div>
+</div>
+
+<div class="mt-10 text-xl text-center">I hear it · I see it · a quiz checks me → <b>yes</b> or <b>no</b></div>
+<div class="mt-3 text-lg text-center op-70">No sends it back. Yes is tied to the exact code.</div>
+
+<!--
+This is the most important idea in the talk.
+
+A gate is not a button I click. It's the point where I show I understand, before the work moves on.
+
+There are three. At the plan gate: do I understand what will be built? At the code gate: do I understand what was built? At the review gate: do I understand the exact code that's going to ship?
+
+At every gate, the AI reads me a summary, shows me a diagram, and quizzes me. If I get it wrong, it explains again. Then I say yes or no. No sends the work back. Yes is tied to the exact code, so if anything changes afterwards, I have to look again.
+-->
+
+---
 layout: center
 ---
 

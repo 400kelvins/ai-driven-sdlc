@@ -36,3 +36,6 @@
 {"at":"2026-10-15T13:03:53.291Z","stage":"plan","story":"16","decision":"yes","fingerprint":"28f03b4b02d8b888","commit":"9ed6888","note":"fast track, folded into PR #24; combined gate; quiz passed first try"}
 {"at":"2026-10-15T13:03:54.308Z","stage":"implement","story":"16","decision":"yes","fingerprint":"28f03b4b02d8b888","commit":"9ed6888","note":"fast track, folded into PR #24; combined gate; quiz passed first try"}
 {"at":"2026-10-15T13:03:55.310Z","stage":"review","story":"16","decision":"yes","fingerprint":"28f03b4b02d8b888","commit":"9ed6888","note":"fast track, folded into PR #24; combined gate; quiz passed first try"}
+{"at":"2026-10-15T13:26:00.416Z","stage":"plan","story":"17","decision":"yes","fingerprint":"3b31970d36ae22b9","commit":"4966302","note":"fast track; combined gate; quiz wrong first (an approve button), right after the driving-test re-explain"}
+{"at":"2026-10-15T13:26:01.461Z","stage":"implement","story":"17","decision":"yes","fingerprint":"3b31970d36ae22b9","commit":"4966302","note":"fast track; combined gate; quiz wrong first (an approve button), right after the driving-test re-explain"}
+{"at":"2026-10-15T13:26:02.496Z","stage":"review","story":"17","decision":"yes","fingerprint":"3b31970d36ae22b9","commit":"4966302","note":"fast track; combined gate; quiz wrong first (an approve button), right after the driving-test re-explain"}
