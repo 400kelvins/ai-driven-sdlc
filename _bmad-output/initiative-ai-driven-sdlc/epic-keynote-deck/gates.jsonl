@@ -43,3 +43,4 @@
 {"at":"2026-10-15T14:00:36.130Z","stage":"implement","story":"19","decision":"yes","fingerprint":"791cde3db0662d6e","commit":"c7d2f97","note":"fast track; combined gate; quiz passed first try"}
 {"at":"2026-10-15T14:00:37.218Z","stage":"review","story":"19","decision":"yes","fingerprint":"791cde3db0662d6e","commit":"c7d2f97","note":"fast track; combined gate; quiz passed first try"}
 {"at":"2026-10-15T14:51:24.751Z","stage":"review","story":"demo-video","decision":"no","fingerprint":"43bb77ff8a535b78","commit":"cd0e74b","note":"no, the video is cropped, my demo is at top and at the bottom, full screen should be visible, also don't compress, it goes on big projector"}
+{"at":"2026-10-15T15:01:31.561Z","stage":"review","story":"demo-video","decision":"yes","fingerprint":"f99e881ac0d78e2e","commit":"9a7a4b0"}
