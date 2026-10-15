@@ -1,7 +1,16 @@
 {
+  "proof": "comment",
+  "reviewers": [
+    {
+      "login": "400kelvins",
+      "id": 190785603
+    }
+  ],
   "scopes": {
     "deck": {
-      "include": ["**"],
+      "include": [
+        "**"
+      ],
       "exclude": [
         "packages/**",
         "_bmad-output/**",
@@ -19,7 +28,9 @@
       ]
     },
     "package": {
-      "include": ["packages/understand-gate/**"],
+      "include": [
+        "packages/understand-gate/**"
+      ],
       "exclude": []
     }
   }

@@ -38,7 +38,17 @@ function main(argv) {
     console.log('understand-gate: no scope touched, nothing to record')
     return 0
   }
-  return ug()
+  const status = ug()
+  const asked = (flag) => argv[argv.indexOf(`--${flag}`) + 1]
+  if (status !== 0 || asked('stage') !== 'review' || asked('decision') !== 'yes') return status
+
+  // The reviewer's proof (spec 014): one line per scope, posted on the pull request from their account
+  const lines = scopes.map((scope) => {
+    const fp = run(UG, ['fingerprint', '--scope', scope], true).stdout.trim()
+    return `/understand-gate yes ${scope} ${fp}`
+  })
+  console.log(`\nPaste on the pull request, from your own account:\n\n${lines.join('\n')}\n`)
+  return 0
 }
 
 process.exitCode = main(process.argv.slice(2))

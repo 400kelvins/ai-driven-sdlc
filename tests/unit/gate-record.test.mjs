@@ -69,6 +69,24 @@ test('committing both ledgers keeps both gates passing', () => {
   assert.equal(ug.status, 0, ug.stderr)
 })
 
+test('a review yes prints the comment line to paste for each touched scope', () => {
+  const dir = repo({ 'slides.md': '# edited', 'packages/understand-gate/a.mjs': 'export const x = 1' })
+  const out = record(dir)
+  assert.equal(out.status, 0, out.stderr)
+  const ug = lines(dir, NEW_LEDGER)
+  assert.match(out.stdout, /Paste on the pull request/)
+  for (const l of ug) assert.ok(out.stdout.includes(`/understand-gate yes ${l.scope} ${l.fingerprint}`), l.scope)
+})
+
+test('a plan yes or a review no prints nothing to paste', () => {
+  for (const args of [['--stage', 'plan', '--story', '5', '--decision', 'yes'], ['--stage', 'review', '--story', '5', '--decision', 'no']]) {
+    const dir = repo({ 'slides.md': '# edited' })
+    const out = spawnSync(process.execPath, [BIN, ...args], { cwd: dir, encoding: 'utf8', env: { ...process.env, UG_BASE: 'main' } })
+    assert.equal(out.status, 0, out.stderr)
+    assert.doesNotMatch(out.stdout, /Paste on the pull request/)
+  }
+})
+
 test('a docs-only branch writes only the old ledger', () => {
   const dir = repo({ 'specs/s.md': '# edited' })
   const out = record(dir)

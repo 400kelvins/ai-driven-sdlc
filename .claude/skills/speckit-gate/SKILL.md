@@ -62,8 +62,15 @@ If the human adds a note, keep it in their words.
 npm run gate:record -- --stage <stage> --story <id> --decision <yes|no> [--note "<their words>"]
 ```
 
-Then set `**Decision**:` in the pack to the answer and the date, and commit the pack and
-`gates.jsonl` together: `docs: <stage> gate <yes|no> for story <id>`.
+Then set `**Decision**:` in the pack to the answer and the date, and commit the pack and both
+ledgers (`gates.jsonl` and `.understand-gate/gates.jsonl`) together:
+`docs: <stage> gate <yes|no> for story <id>`.
+
+After a **review yes**, `gate:record` prints one line per touched scope, such as
+`/understand-gate yes deck 1afa3c26d4d4de6d`. Show these lines to the human and ask them to paste
+them as a comment on the pull request **from their own account**. Never post them yourself: the
+comment is the human's proof of the yes, and the required `understand-gate` check waits for it.
+Posting it re-runs the check.
 
 ## 6. Continue or stop
 

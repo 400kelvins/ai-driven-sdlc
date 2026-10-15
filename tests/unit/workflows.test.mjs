@@ -12,7 +12,8 @@ const ci = readFileSync(`${ROOT}.github/workflows/ci.yml`, 'utf8')
 const review = readFileSync(`${ROOT}.github/workflows/claude-review.yml`, 'utf8')
 const visuals = readFileSync(`${ROOT}.github/workflows/pr-visuals.yml`, 'utf8')
 const gate = readFileSync(`${ROOT}.github/workflows/understand-gate.yml`, 'utf8')
-const ALL = [ci, review, visuals, gate]
+const rerun = readFileSync(`${ROOT}.github/workflows/understand-gate-rerun.yml`, 'utf8')
+const ALL = [ci, review, visuals, gate, rerun]
 
 // Job ids sit at two-space indent under `jobs:`
 const jobs = (yml) => [...yml.split(/^jobs:\n/m)[1].matchAll(/^ {2}([\w-]+):\s*$/gm)].map((m) => m[1])
@@ -52,7 +53,7 @@ test('verify tests only the touched scopes on a PR, everything on a push, and al
 test('understand-gate runs from main: pull_request_target, read-only, and the PR head only as data', () => {
   assert.match(gate, /^on:\n {2}pull_request_target:\n {4}branches: \[main\]/m)
   assert.deepEqual(jobs(gate), ['understand-gate'])
-  assert.match(gate, /^permissions:\n {2}contents: read\n\n/m)
+  assert.match(gate, /^permissions:\n {2}contents: read\n {2}issues: read\n {2}pull-requests: read\n\n/m)
   assert.doesNotMatch(gate, /permissions:[\s\S]*write/)
   // A skipped required check counts as passing, so the job must run and fail for forks
   assert.doesNotMatch(gate, /^ {4}if:/m)
@@ -60,7 +61,9 @@ test('understand-gate runs from main: pull_request_target, read-only, and the PR
   assert.match(gate, /ref: \$\{\{ github\.event\.pull_request\.base\.sha \}\}\n\s+path: base/)
   assert.match(gate, /ref: \$\{\{ github\.event\.pull_request\.head\.sha \}\}\n\s+path: head\n\s+fetch-depth: 0/)
   const runs = [...gate.matchAll(/^\s+run: (.*)$/gm)].map((m) => m[1])
-  assert.deepEqual(runs, ['|', 'node ../base/packages/understand-gate/bin/understand-gate.mjs check --base "$BASE_SHA"'])
+  assert.deepEqual(runs, ['|', '|', 'node ../base/packages/understand-gate/bin/understand-gate.mjs check --base "$BASE_SHA" --comments ../comments.ndjson'])
+  assert.match(gate, /gh api --paginate "repos\/\$REPO\/issues\/\$PR\/comments"/)
+  assert.match(gate, /\{id: \.user\.id, login: \.user\.login, type: \.user\.type, body: \.body\} \| tojson/)
   assert.doesNotMatch(gate, /npm (ci|install|run)/)
 })
 
@@ -70,7 +73,9 @@ test('the human gate fingerprints the PR head commit, not the merge ref', () => 
 })
 
 test('workflows default to read-only permissions', () => {
-  for (const yml of ALL) assert.match(yml, /^permissions:\n {2}contents: read/m)
+  // The re-run helper alone may write, and only to Actions; its own test pins that
+  for (const yml of [ci, review, visuals, gate]) assert.match(yml, /^permissions:\n {2}contents: read/m)
+  assert.doesNotMatch(rerun, /contents: write|pull-requests: write|issues: write/)
 })
 
 test('every action is pinned to a full commit SHA, with its version in a comment', () => {
@@ -235,4 +240,18 @@ test('artifact check rejects anything else', () => {
   assert.equal(validate(pair, { manifest: { ...one, changes: [{ slide: '3', kind: 'changed' }] } }), 'ok=false', 'string slide')
   assert.equal(validate(pair, { manifest: { ...one, changes: [{ slide: 3, kind: '$(id)' }] } }), 'ok=false', 'bad kind')
   assert.equal(validate({ ...pair, '004-after.png': Buffer.concat([PNG, Buffer.alloc(2_200_000)]) }, { manifest: one }), 'ok=false', 'oversize')
+})
+
+test('posting a yes comment re-runs understand-gate without touching pull request code', () => {
+  assert.match(rerun, /^on:\n {2}issue_comment:\n {4}types: \[created, edited, deleted\]/m)
+  assert.match(rerun, /^permissions:\n {2}actions: write\n {2}contents: read\n {2}pull-requests: read\n\n/m)
+  assert.match(rerun, /contains\(fromJSON\('\["OWNER", "MEMBER", "COLLABORATOR"\]'\), github\.event\.comment\.author_association\)/)
+  assert.match(rerun, /contains\(github\.event\.changes\.body\.from, '\/understand-gate yes'\)/)
+  assert.match(rerun, /--paginate/)
+  assert.match(rerun, /exit 1/)
+  assert.match(rerun, /gh run watch "\$run"/)
+  assert.doesNotMatch(rerun, /actions\/checkout|npm |node /)
+  assert.match(rerun, /gh run rerun "\$run"/)
+  // The comment body never reaches a shell: only the PR number and repo are used
+  assert.doesNotMatch(rerun, /comment\.body \}\}/)
 })
