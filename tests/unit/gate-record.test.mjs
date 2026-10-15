@@ -58,6 +58,17 @@ test('one old line, and one understand-gate line per touched scope', () => {
   assert.ok(ug.every((l) => l.stage === 'review' && l.story === '5' && l.note === 'both' && l.firstTry === false && l.attempts === 2))
 })
 
+test('committing both ledgers keeps both gates passing', () => {
+  const dir = repo({ 'slides.md': '# edited', 'packages/understand-gate/a.mjs': 'export const x = 1' })
+  assert.equal(record(dir).status, 0)
+  execFileSync('git', ['add', '-A'], { cwd: dir })
+  execFileSync('git', ['commit', '-qm', 'record'], { cwd: dir })
+  const old = spawnSync(process.execPath, [fileURLToPath(new URL('../../scripts/gate.mjs', import.meta.url)), 'check', '--stage', 'review'], { cwd: dir, encoding: 'utf8' })
+  assert.equal(old.status, 0, old.stderr)
+  const ug = spawnSync(process.execPath, [fileURLToPath(new URL('../../packages/understand-gate/bin/understand-gate.mjs', import.meta.url)), 'check', '--base', 'main'], { cwd: dir, encoding: 'utf8' })
+  assert.equal(ug.status, 0, ug.stderr)
+})
+
 test('a docs-only branch writes only the old ledger', () => {
   const dir = repo({ 'specs/s.md': '# edited' })
   const out = record(dir)

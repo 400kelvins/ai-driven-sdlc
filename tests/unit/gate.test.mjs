@@ -46,7 +46,7 @@ test('slides and code ship; planning docs do not', () => {
   for (const p of ['slides.md', 'pages/talk.md', 'scripts/gate.mjs', 'components/Flow.vue', 'package.json', '.github/workflows/ci.yml', '.specify/extensions.yml']) {
     assert.equal(isCode(p), true, p)
   }
-  for (const p of ['_bmad-output/x/gates.jsonl', 'specs/001/spec.md', '.specify/memory/constitution.md', 'README.md', 'public/demo/README.md']) {
+  for (const p of ['_bmad-output/x/gates.jsonl', '.understand-gate/gates.jsonl', 'specs/001/spec.md', '.specify/memory/constitution.md', 'README.md', 'public/demo/README.md']) {
     assert.equal(isCode(p), false, p)
   }
 })
