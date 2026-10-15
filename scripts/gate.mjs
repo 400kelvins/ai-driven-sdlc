@@ -18,9 +18,11 @@ export const STAGES = ['plan', 'implement', 'review']
 const DOCS_ONLY = /^(_bmad-output|_bmad|specs|\.specify|\.claude|\.agents)\//
 // Gate wiring is covered too: changing which gates run must invalidate an approval.
 const GATE_WIRING = ['.specify/extensions.yml']
+// The understand-gate ledger records decisions, like the ledger above, so it is never code (spec 013)
+const LEDGERS = ['.understand-gate/gates.jsonl']
 export const isCode = (path) =>
-  GATE_WIRING.includes(path) ||
-  (!DOCS_ONLY.test(path) && (!path.endsWith('.md') || path === 'slides.md' || path.startsWith('pages/')))
+  !LEDGERS.includes(path) && (GATE_WIRING.includes(path) ||
+  (!DOCS_ONLY.test(path) && (!path.endsWith('.md') || path === 'slides.md' || path.startsWith('pages/'))))
 
 const git = (...args) => execFileSync('git', args, { encoding: 'utf8' })
 const lines = (out) => out.split('\n').filter(Boolean)

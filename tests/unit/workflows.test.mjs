@@ -11,7 +11,8 @@ const ROOT = fileURLToPath(new URL('../../', import.meta.url))
 const ci = readFileSync(`${ROOT}.github/workflows/ci.yml`, 'utf8')
 const review = readFileSync(`${ROOT}.github/workflows/claude-review.yml`, 'utf8')
 const visuals = readFileSync(`${ROOT}.github/workflows/pr-visuals.yml`, 'utf8')
-const ALL = [ci, review, visuals]
+const gate = readFileSync(`${ROOT}.github/workflows/understand-gate.yml`, 'utf8')
+const ALL = [ci, review, visuals, gate]
 
 // Job ids sit at two-space indent under `jobs:`
 const jobs = (yml) => [...yml.split(/^jobs:\n/m)[1].matchAll(/^ {2}([\w-]+):\s*$/gm)].map((m) => m[1])
@@ -30,9 +31,37 @@ test('CI runs on pull requests and pushes to main', () => {
   assert.match(ci, /push:\s*\n\s+branches:\s*\[main\]/)
 })
 
-test('CI runs the same verify and gate check as npm run ship', () => {
-  assert.match(ci, /run: npm run verify/)
+test('CI runs the same deck checks as npm run verify, the package tests, and the gate check', () => {
+  assert.match(ci, /run: npm run verify:deck/)
+  assert.match(ci, /run: npm test -w understand-gate/)
   assert.match(ci, /run: npm run gate:check/)
+})
+
+test('verify tests only the touched scopes on a PR, everything on a push, and always reports', () => {
+  const verify = ci.split(/^ {2}verify:/m)[1].split(/^ {2}human-gate:/m)[0]
+  assert.doesNotMatch(verify, /^ {4}if:/m, 'the job itself must always run')
+  assert.match(verify, /fetch-depth: 0/)
+  assert.match(verify, /touched --base "\$BASE_SHA"/)
+  assert.match(verify, /"\$EVENT" = push/)
+  for (const step of ['npm ci', 'npx playwright install --with-deps chromium', 'npm run verify:deck']) {
+    assert.match(verify, new RegExp(`if: steps\\.areas\\.outputs\\.deck == 'true'\\n\\s+run: ${step.replace(/[.*+?^${}()|[\]\\-]/g, '\\$&')}`), step)
+  }
+  assert.match(verify, /if: steps\.areas\.outputs\.package == 'true'\n\s+run: npm test -w understand-gate/)
+})
+
+test('understand-gate runs from main: pull_request_target, read-only, and the PR head only as data', () => {
+  assert.match(gate, /^on:\n {2}pull_request_target:\n {4}branches: \[main\]/m)
+  assert.deepEqual(jobs(gate), ['understand-gate'])
+  assert.match(gate, /^permissions:\n {2}contents: read\n\n/m)
+  assert.doesNotMatch(gate, /permissions:[\s\S]*write/)
+  // A skipped required check counts as passing, so the job must run and fail for forks
+  assert.doesNotMatch(gate, /^ {4}if:/m)
+  assert.match(gate, /if \[ "\$HEAD_REPO" != "\$REPO" \]; then[\s\S]*?exit 1/)
+  assert.match(gate, /ref: \$\{\{ github\.event\.pull_request\.base\.sha \}\}\n\s+path: base/)
+  assert.match(gate, /ref: \$\{\{ github\.event\.pull_request\.head\.sha \}\}\n\s+path: head\n\s+fetch-depth: 0/)
+  const runs = [...gate.matchAll(/^\s+run: (.*)$/gm)].map((m) => m[1])
+  assert.deepEqual(runs, ['|', 'node ../base/packages/understand-gate/bin/understand-gate.mjs check --base "$BASE_SHA"'])
+  assert.doesNotMatch(gate, /npm (ci|install|run)/)
 })
 
 test('the human gate fingerprints the PR head commit, not the merge ref', () => {
@@ -64,10 +93,11 @@ test('pushes to main never cancel each other', () => {
   assert.match(ci, /cancel-in-progress: \$\{\{ github\.event_name == 'pull_request' \}\}/)
 })
 
-test('branch protection requires both checks, up to date, for admins too', () => {
+test('branch protection requires every check, up to date, for admins too', () => {
   const p = JSON.parse(readFileSync(`${ROOT}.github/branch-protection.json`, 'utf8'))
   // Pinned to the GitHub Actions app (15368), so no other app or token can post a green check
-  assert.deepEqual(p.required_status_checks, { strict: true, checks: jobs(ci).map((context) => ({ context, app_id: 15368 })) })
+  const required = [...jobs(ci), ...jobs(gate)].map((context) => ({ context, app_id: 15368 }))
+  assert.deepEqual(p.required_status_checks, { strict: true, checks: required })
   assert.equal(p.enforce_admins, true)
   assert.equal(p.allow_force_pushes, false)
   assert.equal(p.allow_deletions, false)
