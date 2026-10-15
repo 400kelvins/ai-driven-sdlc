@@ -1,7 +1,13 @@
 {
+  "proof": "comment",
+  "reviewers": [
+    "400kelvins"
+  ],
   "scopes": {
     "deck": {
-      "include": ["**"],
+      "include": [
+        "**"
+      ],
       "exclude": [
         "packages/**",
         "_bmad-output/**",
@@ -19,7 +25,9 @@
       ]
     },
     "package": {
-      "include": ["packages/understand-gate/**"],
+      "include": [
+        "packages/understand-gate/**"
+      ],
       "exclude": []
     }
   }

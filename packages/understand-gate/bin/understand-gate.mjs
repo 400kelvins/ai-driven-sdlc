@@ -4,7 +4,7 @@
 //   understand-gate fingerprint --scope <name>
 //   understand-gate record --scope <a,b> --stage plan|implement|review --story <id> --decision yes|no
 //                          [--attempts <n>] [--first-try yes|no] [--confidence 1-5] [--note "<text>"] [--dry-run]
-//   understand-gate check --base <ref> | --all
+//   understand-gate check --base <ref> | --all   [--comments <file>]   # comments: one {login,type,body} per line
 //   understand-gate touched --base <ref>       # touched scope names, one per line
 //   understand-gate stats
 //
@@ -12,6 +12,7 @@
 import { parseArgs } from '../src/args.mjs'
 import { fingerprint } from '../src/fingerprint.mjs'
 import { changedSince, git, isShallow, repoRoot, showAt } from '../src/git.mjs'
+import { commentLine, hasCommentProof, readComments } from '../src/proof.mjs'
 import { LEDGER, appendLines, approval, assertAppendOnly, decisionLines, readLedger } from '../src/ledger.mjs'
 import { CONFIG, inScope, loadConfig, parseConfig } from '../src/scopes.mjs'
 import { formatStats, stats } from '../src/stats.mjs'
@@ -39,10 +40,11 @@ function touchedSince(root, baseRef) {
   const baseConfig = showAt(root, base, CONFIG)
   // Without a config at the base, the branch would choose its own scopes; refuse instead
   if (baseConfig === null) throw new Error(`${CONFIG} not found at the merge base with ${baseRef}; merge the config first`)
-  const scopes = parseConfig(baseConfig, `${CONFIG} at ${baseRef}`).scopes
+  const judged = parseConfig(baseConfig, `${CONFIG} at ${baseRef}`)
+  const { scopes } = judged
   assertAppendOnly(root, showAt(root, base, LEDGER))
   const changed = changedSince(root, base)
-  return { scopes, names: Object.keys(scopes).filter((n) => changed.some((path) => inScope(path, scopes[n]))) }
+  return { config: judged, scopes, names: Object.keys(scopes).filter((n) => changed.some((path) => inScope(path, scopes[n]))) }
 }
 
 const COMMANDS = {
@@ -82,14 +84,22 @@ const COMMANDS = {
     let { scopes } = config
     let names = Object.keys(scopes)
     if (!all) {
-      ;({ scopes, names } = touchedSince(root, args.base))
+      ;({ config, scopes, names } = touchedSince(root, args.base))
       if (!names.length) {
         console.log(`Human review gate passed: no scope touched since ${args.base}`)
         return
       }
     }
     const ledger = readLedger(root)
-    const results = names.map((n) => approval(ledger, n, fingerprint(scopes[n], { cwd: root })))
+    // Proof settings come from the same config as the scopes: main's, for a branch (AD-5)
+    const comments = typeof args.comments === 'string' ? readComments(args.comments) : null
+    const results = names.map((n) => {
+      const fp = fingerprint(scopes[n], { cwd: root })
+      const result = approval(ledger, n, fp)
+      if (!result.ok || config.proof !== 'comment') return result
+      if (comments && hasCommentProof(comments, config.reviewers, n, fp)) return result
+      return { ok: false, reason: `${n}: post on the pull request: ${commentLine(n, fp)}` }
+    })
     const failed = results.filter((r) => !r.ok)
     if (failed.length) throw new Error(`Human review gate not passed: ${failed.map((r) => r.reason).join('; ')}`)
     console.log(`Human review gate passed: ${results.map((r) => `${r.entry.scope} (story ${r.entry.story})`).join(', ')}`)

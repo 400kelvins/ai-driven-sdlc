@@ -1,0 +1,34 @@
+# Posting `/understand-gate yes <scope> <fingerprint>` on a pull request re-runs its understand-gate
+# check, so the reviewer never has to push again (spec 014). Runs from main (issue_comment always does),
+# checks out nothing, and runs no pull request code: it only asks GitHub to re-run an existing run.
+name: understand-gate re-run
+
+on:
+  issue_comment:
+    types: [created, edited]
+
+permissions:
+  actions: write
+  contents: read
+  pull-requests: read
+
+jobs:
+  rerun:
+    # Advisory helper, not a required check, so skipping it for other comments is safe
+    if: github.event.issue.pull_request && contains(github.event.comment.body, '/understand-gate yes')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Re-run the latest understand-gate check for this pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.issue.number }}
+        run: |
+          run=$(gh api "repos/$REPO/actions/workflows/understand-gate.yml/runs?event=pull_request_target&per_page=50" \
+            --jq "[.workflow_runs[] | select(any(.pull_requests[]; .number == $PR))][0].id // empty")
+          if [ -z "$run" ]; then
+            echo "No understand-gate run found for pull request #$PR"
+            exit 0
+          fi
+          gh run rerun "$run" --repo "$REPO"

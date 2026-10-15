@@ -52,3 +52,5 @@ The gate core and its CI wiring, inside this repo. Not the installer into other 
 - Decision: four package epics in this order: gate core, install, review experience, onboarding (presenter, 2026-10-15).
 - Decision: the presenter's first story (scopes, CI path filters, release script) is split into entries 1, 3 and 5 (presenter, 2026-10-15).
 - Decision: old and new gates run side by side until entry 6 (architecture AD-10).
+- Decision: proof of a human yes is a PR comment from the presenter (comment mode); signed-commit and bot-account modes deferred. The presenter knows an agent using the same login could post it (presenter, 2026-10-15).
+- Decision: understand-gate check runs on pull_request_target from main (presenter chose option A, 2026-10-15).

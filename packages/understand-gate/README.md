@@ -77,5 +77,23 @@ run only the tests for those scopes.
 change which tests it runs. The gate is `understand-gate`. A scope config must already be on `main`
 before `check --base` judges a branch; without one, the check refuses.
 
-Known limits until later stories: a yes in the ledger is not yet proven to come from a human (Story
-2.4), and a pull request could add its own job named `understand-gate`.
+## Proof of a human yes
+
+With `"proof": "comment"` and `"reviewers": ["<github-login>"]` in the config, a review yes counts only
+when a listed reviewer comments on the pull request with one line per touched scope:
+
+```text
+/understand-gate yes deck 1afa3c26d4d4de6d
+```
+
+The line must name the scope and its current fingerprint, so a code change after the comment needs a
+new review and a new comment. Comments from bot accounts never count. CI reads the proof settings from
+`main`, like the scopes, so a branch cannot switch proof off. Posting the comment re-runs the check
+(`understand-gate-rerun.yml`).
+
+**What it proves, and what it does not.** The comment shows the human's decision on the pull request,
+where anyone can see it. It does not stop an agent that uses the reviewer's own GitHub login: GitHub
+shows that agent's comment under the same name. For a yes the agent cannot produce, give the agent its
+own GitHub account and require the reviewer's approval (a later mode).
+
+Known limit: a pull request could add its own job named `understand-gate`.

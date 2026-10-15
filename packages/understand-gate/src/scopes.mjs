@@ -89,5 +89,10 @@ export function parseConfig(text, where = CONFIG) {
       if (problem) throw new Error(`${where}: scope "${name}" pattern ${JSON.stringify(pattern)} ${problem}`)
     }
   }
+  if (config.proof !== undefined && config.proof !== 'comment') throw new Error(`${where}: "proof" must be "comment" or left out`)
+  if (config.proof === 'comment') {
+    const ok = Array.isArray(config.reviewers) && config.reviewers.length && config.reviewers.every((r) => typeof r === 'string' && r)
+    if (!ok) throw new Error(`${where}: "proof": "comment" needs "reviewers", a list of GitHub logins`)
+  }
   return config
 }
