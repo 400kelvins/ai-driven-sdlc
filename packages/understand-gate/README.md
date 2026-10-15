@@ -101,3 +101,16 @@ shows that agent's comment under the same name. For a yes the agent cannot produ
 own GitHub account and require the reviewer's approval (a later mode).
 
 Known limit: a pull request could add its own job named `understand-gate`.
+
+## Release (maintainers)
+
+`main` is protected, so a release has two steps, and a human always publishes:
+
+```sh
+npm run release -w understand-gate -- prepare minor   # clean main → release branch, both packages bumped
+# open a pull request for that branch; gates, your yes comment, merge
+npm run release -w understand-gate -- tag             # on main: tests, package yes, file list, tag; then stops
+```
+
+`tag` prints the commands to push the tag and run `npm publish` for `understand-gate` and its alias
+`read-listen-see`. It never pushes or publishes.

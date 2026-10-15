@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // understand-gate: no yes without understanding.
 //
-//   understand-gate fingerprint --scope <name>
+//   understand-gate fingerprint --scope <name> [--base <ref>]   # --base: judge by the config at the merge base
 //   understand-gate record --scope <a,b> --stage plan|implement|review --story <id> --decision yes|no
 //                          [--attempts <n>] [--first-try yes|no] [--confidence 1-5] [--note "<text>"] [--dry-run]
 //   understand-gate check --base <ref> | --all   [--comments <file>]   # comments: one {login,type,body} per line
@@ -47,14 +47,26 @@ function touchedSince(root, baseRef) {
   return { config: judged, scopes, names: Object.keys(scopes).filter((n) => changed.some((path) => inScope(path, scopes[n]))) }
 }
 
+/**
+ * With --base, scopes come from the config at the merge base, as `check --base` judges them; so a yes
+ * recorded on a branch that changes the config still matches what CI computes.
+ */
+function scopesFor(root, config, args) {
+  if (args.base === undefined) return config.scopes
+  if (typeof args.base !== 'string') throw new Usage()
+  return touchedSince(root, args.base).scopes
+}
+
 const COMMANDS = {
-  fingerprint(root, { scopes }, args) {
+  fingerprint(root, config, args) {
+    const scopes = scopesFor(root, config, args)
     if (typeof args.scope !== 'string') throw new Usage()
     const [name] = pickScopes(scopes, [args.scope])
     console.log(fingerprint(scopes[name], { cwd: root }))
   },
 
-  record(root, { scopes }, args) {
+  record(root, config, args) {
+    const scopes = scopesFor(root, config, args)
     for (const flag of ['scope', 'stage', 'story', 'decision', 'attempts', 'first-try', 'confidence', 'note']) {
       if (args[flag] === true) throw new Error(`--${flag} needs a value`)
     }

@@ -1,0 +1,31 @@
+{
+  "name": "read-listen-see",
+  "version": "0.0.0",
+  "description": "Alias of understand-gate: read, listen, see. No yes without understanding.",
+  "keywords": [
+    "understand-gate",
+    "ai",
+    "code-review"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/400kelvins/ai-driven-sdlc.git",
+    "directory": "packages/read-listen-see"
+  },
+  "type": "module",
+  "bin": {
+    "read-listen-see": "bin/read-listen-see.mjs"
+  },
+  "files": [
+    "bin",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20.12"
+  },
+  "dependencies": {
+    "understand-gate": "0.0.0"
+  }
+}

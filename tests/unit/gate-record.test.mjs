@@ -87,6 +87,20 @@ test('a plan yes or a review no prints nothing to paste', () => {
   }
 })
 
+test('a branch that changes a scope records fingerprints the check will accept', () => {
+  const grown = structuredClone(CONFIG)
+  grown.scopes.package.include.push('packages/alias/**')
+  const dir = repo({ '.understand-gate/config.json': JSON.stringify(grown), 'packages/alias/a.mjs': 'export {}', 'packages/understand-gate/a.mjs': 'export const y = 1' })
+  const out = record(dir)
+  assert.equal(out.status, 0, out.stderr)
+  execFileSync('git', ['add', '-A'], { cwd: dir })
+  execFileSync('git', ['commit', '-qm', 'record'], { cwd: dir })
+  const ugBin = fileURLToPath(new URL('../../packages/understand-gate/bin/understand-gate.mjs', import.meta.url))
+  const check = spawnSync(process.execPath, [ugBin, 'check', '--base', 'main'], { cwd: dir, encoding: 'utf8' })
+  assert.equal(check.status, 0, check.stderr)
+  for (const l of lines(dir, NEW_LEDGER)) assert.ok(out.stdout.includes(`/understand-gate yes ${l.scope} ${l.fingerprint}`))
+})
+
 test('a docs-only branch writes only the old ledger', () => {
   const dir = repo({ 'specs/s.md': '# edited' })
   const out = record(dir)

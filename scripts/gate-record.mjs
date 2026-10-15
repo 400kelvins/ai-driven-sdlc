@@ -18,7 +18,8 @@ const run = (bin, args, capture = false) =>
 
 function main(argv) {
   // Which scopes first, so a failure stops before either ledger is written
-  const touched = run(UG, ['touched', '--base', process.env.UG_BASE || 'origin/main'], true)
+  const base = process.env.UG_BASE || 'origin/main'
+  const touched = run(UG, ['touched', '--base', base], true)
   if (touched.status !== 0) return touched.status ?? 1
   const scopes = touched.stdout.split('\n').filter(Boolean)
 
@@ -26,7 +27,8 @@ function main(argv) {
   for (let i = 0; i < argv.length; i++) {
     if (PASS.includes(argv[i].replace(/^--/, '')) && argv[i + 1] !== undefined) forwarded.push(argv[i], argv[++i])
   }
-  const ug = (...more) => run(UG, ['record', '--scope', scopes.join(','), ...forwarded, ...more]).status ?? 1
+  // Fingerprint with main's config, exactly as the understand-gate check will
+  const ug = (...more) => run(UG, ['record', '--base', base, '--scope', scopes.join(','), ...forwarded, ...more]).status ?? 1
 
   // Check the understand-gate answer before writing anything, so a refusal leaves no half-written record
   if (scopes.length && ug('--dry-run') !== 0) return 1
@@ -44,7 +46,7 @@ function main(argv) {
 
   // The reviewer's proof (spec 014): one line per scope, posted on the pull request from their account
   const lines = scopes.map((scope) => {
-    const fp = run(UG, ['fingerprint', '--scope', scope], true).stdout.trim()
+    const fp = run(UG, ['fingerprint', '--base', base, '--scope', scope], true).stdout.trim()
     return `/understand-gate yes ${scope} ${fp}`
   })
   console.log(`\nPaste on the pull request, from your own account:\n\n${lines.join('\n')}\n`)
