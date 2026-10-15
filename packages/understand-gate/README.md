@@ -56,3 +56,19 @@ Patterns match the whole path from the repository root:
 - Excludes apply in order and the last match wins; `!pattern` brings a file back.
 
 A file in no scope, such as a planning document, changes no fingerprint.
+
+## In CI
+
+The required `understand-gate` check runs on `pull_request_target`, so the workflow, the checker, and
+the scope config all come from `main`. The pull request's head is checked out only as data:
+
+```sh
+node ../base/packages/understand-gate/bin/understand-gate.mjs check --base "$BASE_SHA"
+```
+
+Nothing from the pull request is installed or run, the token is read-only, and checkouts keep no
+credentials. A pull request that edits the workflow, the checker, or the config is still judged by
+main's copies; its edits apply only after it merges, which needs a yes for the scope they are in.
+
+`understand-gate touched --base <ref>` prints the scopes a branch touched, one per line, so CI can
+run only the tests for those scopes.

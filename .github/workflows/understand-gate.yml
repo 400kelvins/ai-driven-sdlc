@@ -1,0 +1,45 @@
+# Required check `understand-gate` (spec 013, architecture AD-2): a pull request cannot weaken its own gate.
+# pull_request_target runs this file, the checker, and the scope config from main. The PR head is checked
+# out only as data: git reads it, nothing from it is installed or run.
+name: understand-gate
+
+on:
+  pull_request_target:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: understand-gate-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  understand-gate:
+    # Forks get no result, so a fork PR stays blocked until a maintainer brings it in
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checker and config from main
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: base
+          persist-credentials: false
+      - name: Pull request head, as data
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          path: head
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+      # The only command: main's checker, run against the PR head
+      - name: Check every touched scope
+        working-directory: head
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: node ../base/packages/understand-gate/bin/understand-gate.mjs check --base "$BASE_SHA"

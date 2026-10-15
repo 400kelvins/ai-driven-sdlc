@@ -1,0 +1,7 @@
+# Owners of the gate (spec 013, architecture AD-2). These paths decide how every pull request is judged.
+# Only enforced when the branch rule requires code-owner review; it records ownership for contributors.
+/.github/                    @400kelvins
+/.understand-gate/           @400kelvins
+/packages/understand-gate/   @400kelvins
+/scripts/gate.mjs            @400kelvins
+/scripts/gate-record.mjs     @400kelvins

@@ -5,6 +5,7 @@
 //   understand-gate record --scope <a,b> --stage plan|implement|review --story <id> --decision yes|no
 //                          [--attempts <n>] [--first-try yes|no] [--confidence 1-5] [--note "<text>"]
 //   understand-gate check --base <ref> | --all
+//   understand-gate touched --base <ref>       # touched scope names, one per line
 //   understand-gate stats
 //
 // Exit codes: 0 pass, 1 failure, 2 usage. Errors are one line on stderr.
@@ -16,7 +17,7 @@ import { CONFIG, inScope, loadConfig, parseConfig } from '../src/scopes.mjs'
 import { formatStats, stats } from '../src/stats.mjs'
 
 const USAGE =
-  'Usage: understand-gate fingerprint --scope <name> | record --scope <a,b> --stage <s> --story <id> --decision yes|no | check --base <ref> | check --all | stats'
+  'Usage: understand-gate fingerprint --scope <name> | record --scope <a,b> --stage <s> --story <id> --decision yes|no | check --base <ref> | check --all | touched --base <ref> | stats'
 
 class Usage extends Error {}
 
@@ -25,6 +26,21 @@ function pickScopes(scopes, names) {
     if (!Object.hasOwn(scopes, name)) throw new Error(`Unknown scope "${name}"; known scopes: ${Object.keys(scopes).join(', ')}`)
   }
   return names
+}
+
+/**
+ * Scopes a branch touched since it left `baseRef`, judged by the config at the merge base.
+ * A branch must not judge itself: scopes and earlier decisions come from where it started (AD-2, AD-4).
+ */
+function touchedSince(root, config, baseRef) {
+  // A shallow clone can hide the real merge base, and with it the files a branch changed
+  if (isShallow(root)) throw new Error('shallow clone: fetch full history (actions/checkout fetch-depth: 0) before using --base')
+  const base = git(root, 'merge-base', baseRef, 'HEAD').trim()
+  const baseConfig = showAt(root, base, CONFIG)
+  const scopes = baseConfig === null ? config.scopes : parseConfig(baseConfig, `${CONFIG} at ${baseRef}`).scopes
+  assertAppendOnly(root, showAt(root, base, LEDGER))
+  const changed = changedSince(root, base)
+  return { scopes, names: Object.keys(scopes).filter((n) => changed.some((path) => inScope(path, scopes[n]))) }
 }
 
 const COMMANDS = {
@@ -51,22 +67,19 @@ const COMMANDS = {
     for (const l of lines) console.log(`Recorded ${l.stage} ${l.decision} for ${l.scope}, story ${l.story} (${l.fingerprint})`)
   },
 
+  touched(root, config, args) {
+    if (typeof args.base !== 'string') throw new Usage()
+    const { names } = touchedSince(root, config, args.base)
+    if (names.length) console.log(names.join('\n'))
+  },
+
   check(root, config, args) {
     const all = args.all === true && args.base === undefined
     if (!all && (typeof args.base !== 'string' || args.all !== undefined)) throw new Usage()
     let { scopes } = config
     let names = Object.keys(scopes)
     if (!all) {
-      // A shallow clone can hide the real merge base, and with it the files a branch changed
-      if (isShallow(root)) throw new Error('shallow clone: fetch full history (actions/checkout fetch-depth: 0) before check --base')
-      const base = git(root, 'merge-base', args.base, 'HEAD').trim()
-      // A branch must not judge itself: scopes and earlier decisions come from where it started (AD-2, AD-4)
-      const baseConfig = showAt(root, base, CONFIG)
-      if (baseConfig !== null) scopes = parseConfig(baseConfig, `${CONFIG} at ${args.base}`).scopes
-      names = Object.keys(scopes)
-      assertAppendOnly(root, showAt(root, base, LEDGER))
-      const changed = changedSince(root, base)
-      names = names.filter((n) => changed.some((path) => inScope(path, scopes[n])))
+      ;({ scopes, names } = touchedSince(root, config, args.base))
       if (!names.length) {
         console.log(`Human review gate passed: no scope touched since ${args.base}`)
         return
