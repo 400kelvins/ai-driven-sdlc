@@ -13,3 +13,7 @@ Each later Story edits only its own file. `slides.md` headmatter is owned by Sto
 | 7 | Links | `pages/links.md` | Try It Yourself | 7 |
 
 Smoke test asserts these 7 headings appear in this order.
+
+"Try It Yourself" also appears as slide 2 (`pages/try-early.md`, imported from `pages/intro.md`) so the
+room can scan the QR codes early. Both slides render `components/TryItLinks.vue`. Section order uses
+each heading's last appearance.
