@@ -4,7 +4,7 @@ test('presenter view shows notes, next slide, 20:00 countdown, and clock', async
   await page.goto('/presenter/1')
   await expect(page.getByText('who still writes requirements docs by hand')).toBeVisible()
   // Next-slide preview renders slide 2
-  await expect(page.getByRole('heading', { level: 1, name: 'Why I built it this way' }).first()).toBeAttached()
+  await expect(page.getByRole('heading', { level: 1, name: 'Try It Yourself' }).first()).toBeAttached()
   // Slidev's presenter timer (TimerInlined): countdown starts at 20:00
   await expect(page.locator('.text-3xl.font-mono').filter({ hasText: /^\s*20\s*:\s*00\s*$/ })).toBeVisible()
   await expect(page.getByTestId('presenter-clock')).toHaveText(/\d{1,2}:\d{2}/)
@@ -20,9 +20,9 @@ test('audience view follows presenter and never shows notes', async ({ browser }
 
   await presenter.keyboard.press('ArrowRight')
   await expect(audience).toHaveURL(/\/2(\?|$)/)
-  await expect(audience.getByRole('heading', { level: 1, name: 'Why I built it this way' })).toBeVisible()
+  await expect(audience.getByRole('heading', { level: 1, name: 'Try It Yourself' })).toBeVisible()
 
-  await expect(audience.getByText('A quick word on why this talk looks the way it does')).toHaveCount(0)
+  await expect(audience.getByText('Before we start: scan these now')).toHaveCount(0)
   await expect(audience.getByTestId('presenter-clock')).toHaveCount(0)
   await ctx.close()
 })

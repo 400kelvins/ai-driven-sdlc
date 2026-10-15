@@ -27,10 +27,10 @@ test('code keeps a monospace font', async ({ page }) => {
   expect(mono).not.toMatch(/Fjord One/)
 })
 
-test('"Why I built it this way" is slide 2 and says fintech', async ({ page }) => {
+test('"Why I built it this way" is slide 3 and says fintech', async ({ page }) => {
   const slides = await deckSlides(page)
-  expect(slides[1].title).toBe('Why I built it this way')
-  await page.goto('/2')
-  await onSlide(page, 2)
-  await expect(page.locator('.slidev-page-2')).toContainText("I work in fintech. I can't show you our code.")
+  expect(slides[2].title).toBe('Why I built it this way')
+  await page.goto('/3')
+  await onSlide(page, 3)
+  await expect(page.locator('.slidev-page-3')).toContainText("I work in fintech. I can't show you our code.")
 })

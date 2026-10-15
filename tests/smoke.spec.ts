@@ -11,9 +11,19 @@ test.beforeEach(async ({ page }) => {
 
 test('sections appear in contract order', async ({ page }) => {
   const titles = (await deckSlides(page)).map((s) => s.title)
-  const positions = SECTIONS.map((t) => titles.indexOf(t))
+  // lastIndexOf: "Try It Yourself" also opens the deck at slide 2; its section is the closing one
+  const positions = SECTIONS.map((t) => titles.lastIndexOf(t))
   expect(positions.every((p) => p >= 0)).toBe(true)
   expect([...positions].sort((a, b) => a - b)).toEqual(positions)
+})
+
+test('slide 2 is Try It Yourself, so the room can scan the QR codes early', async ({ page }) => {
+  const titles = (await deckSlides(page)).map((s) => s.title)
+  expect(titles[1]).toBe('Try It Yourself')
+  await page.goto('/2')
+  await onSlide(page, 2)
+  await expect(page.getByTestId('qr-deck')).toBeVisible()
+  await expect(page.getByTestId('qr-repo')).toBeVisible()
 })
 
 test('arrow keys move one slide at a time through the deck and back', async ({ page }) => {

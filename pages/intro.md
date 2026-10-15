@@ -20,6 +20,10 @@ Today I'll show you what happens when every one of those steps is handed to AI, 
 -->
 
 ---
+src: ./try-early.md
+---
+
+---
 
 # Why I built it this way
 
