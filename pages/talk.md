@@ -522,6 +522,23 @@ Pick one Story next week. Speak it, spec it, and stop it at three gates: plan, c
 
 ---
 layout: center
+class: text-center
+---
+
+# Thank you!
+
+<div class="mt-12 text-3xl text-center">Questions? Scan to keep the deck.</div>
+
+<img src="/qr/deck.svg" alt="QR code to the live deck" class="w-48 h-48 mx-auto mt-8 bg-white p-1 rounded" />
+
+<!--
+Thank you for listening.
+
+I'm happy to take questions. And if you want this deck, scan the code: it's live, and every slide in it went through the same gates you just saw.
+-->
+
+---
+layout: center
 ---
 
 # "Wow, I can do that much with AI.<br/>I thought I only had to prompt."
