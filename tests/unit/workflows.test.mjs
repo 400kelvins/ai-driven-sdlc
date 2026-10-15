@@ -63,6 +63,7 @@ test('understand-gate runs from main: pull_request_target, read-only, and the PR
   const runs = [...gate.matchAll(/^\s+run: (.*)$/gm)].map((m) => m[1])
   assert.deepEqual(runs, ['|', '|', 'node ../base/packages/understand-gate/bin/understand-gate.mjs check --base "$BASE_SHA" --comments ../comments.ndjson'])
   assert.match(gate, /gh api --paginate "repos\/\$REPO\/issues\/\$PR\/comments"/)
+  assert.match(gate, /\{id: \.user\.id, login: \.user\.login, type: \.user\.type, body: \.body\} \| tojson/)
   assert.doesNotMatch(gate, /npm (ci|install|run)/)
 })
 
@@ -242,9 +243,13 @@ test('artifact check rejects anything else', () => {
 })
 
 test('posting a yes comment re-runs understand-gate without touching pull request code', () => {
-  assert.match(rerun, /^on:\n {2}issue_comment:\n {4}types: \[created, edited\]/m)
+  assert.match(rerun, /^on:\n {2}issue_comment:\n {4}types: \[created, edited, deleted\]/m)
   assert.match(rerun, /^permissions:\n {2}actions: write\n {2}contents: read\n {2}pull-requests: read\n\n/m)
-  assert.match(rerun, /if: github\.event\.issue\.pull_request && contains\(github\.event\.comment\.body, '\/understand-gate yes'\)/)
+  assert.match(rerun, /contains\(fromJSON\('\["OWNER", "MEMBER", "COLLABORATOR"\]'\), github\.event\.comment\.author_association\)/)
+  assert.match(rerun, /contains\(github\.event\.changes\.body\.from, '\/understand-gate yes'\)/)
+  assert.match(rerun, /--paginate/)
+  assert.match(rerun, /exit 1/)
+  assert.match(rerun, /gh run watch "\$run"/)
   assert.doesNotMatch(rerun, /actions\/checkout|npm |node /)
   assert.match(rerun, /gh run rerun "\$run"/)
   // The comment body never reaches a shell: only the PR number and repo are used

@@ -5,21 +5,24 @@ import { readFileSync } from 'node:fs'
 
 export const commentLine = (scope, fingerprint) => `/understand-gate yes ${scope} ${fingerprint}`
 
-/** `comments`: [{ login, type, body }] as fetched from the pull request. */
+/**
+ * `comments`: [{ id, login, type, body }] as fetched from the pull request; `reviewers`: [{ login, id }].
+ * Matched by numeric user id: GitHub releases a renamed account's old login, so a name alone could be re-claimed.
+ */
 export function hasCommentProof(comments, reviewers, scope, fingerprint) {
-  const allowed = new Set(reviewers.map((r) => r.toLowerCase()))
+  const allowed = new Set(reviewers.map((r) => r.id))
   const line = commentLine(scope, fingerprint)
   return comments.some(
     (c) =>
       c.type !== 'Bot' &&
-      typeof c.login === 'string' &&
-      allowed.has(c.login.toLowerCase()) &&
+      Number.isInteger(c.id) &&
+      allowed.has(c.id) &&
       typeof c.body === 'string' &&
       c.body.split(/\r?\n/).some((l) => l.trim() === line),
   )
 }
 
-/** One JSON object per line: { login, type, body } (what CI's `gh api --jq` writes). */
+/** One JSON object per line: { id, login, type, body } (what CI's `gh api --jq ... | tojson` writes). */
 export function readComments(file) {
   let text
   try {

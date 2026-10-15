@@ -91,8 +91,10 @@ export function parseConfig(text, where = CONFIG) {
   }
   if (config.proof !== undefined && config.proof !== 'comment') throw new Error(`${where}: "proof" must be "comment" or left out`)
   if (config.proof === 'comment') {
-    const ok = Array.isArray(config.reviewers) && config.reviewers.length && config.reviewers.every((r) => typeof r === 'string' && r)
-    if (!ok) throw new Error(`${where}: "proof": "comment" needs "reviewers", a list of GitHub logins`)
+    const ok =
+      Array.isArray(config.reviewers) && config.reviewers.length &&
+      config.reviewers.every((r) => typeof r?.login === 'string' && r.login && Number.isInteger(r.id) && r.id > 0)
+    if (!ok) throw new Error(`${where}: "proof": "comment" needs "reviewers": [{ "login": "<name>", "id": <GitHub user id> }]`)
   }
   return config
 }

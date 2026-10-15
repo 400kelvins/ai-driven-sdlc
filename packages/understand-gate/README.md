@@ -79,8 +79,10 @@ before `check --base` judges a branch; without one, the check refuses.
 
 ## Proof of a human yes
 
-With `"proof": "comment"` and `"reviewers": ["<github-login>"]` in the config, a review yes counts only
-when a listed reviewer comments on the pull request with one line per touched scope:
+With `"proof": "comment"` and `"reviewers": [{ "login": "<github-login>", "id": <user id> }]` in the
+config, a review yes counts only when a listed reviewer comments on the pull request with one line per
+touched scope. Reviewers are matched by numeric user id (`gh api users/<login> --jq .id`), because
+GitHub frees a renamed account's old login for anyone to claim:
 
 ```text
 /understand-gate yes deck 1afa3c26d4d4de6d
@@ -88,8 +90,10 @@ when a listed reviewer comments on the pull request with one line per touched sc
 
 The line must name the scope and its current fingerprint, so a code change after the comment needs a
 new review and a new comment. Comments from bot accounts never count. CI reads the proof settings from
-`main`, like the scopes, so a branch cannot switch proof off. Posting the comment re-runs the check
-(`understand-gate-rerun.yml`).
+`main`, like the scopes, so a branch cannot switch proof off. Posting, editing, or deleting a yes line
+re-runs the check (`understand-gate-rerun.yml`, only for owners and collaborators). A re-run reuses the
+original run's event, so a config change on `main` applies from the pull request's next push.
+`check --all` reads the working tree's config and is for local use only; CI uses `check --base`.
 
 **What it proves, and what it does not.** The comment shows the human's decision on the pull request,
 where anyone can see it. It does not stop an agent that uses the reviewer's own GitHub login: GitHub

@@ -1,7 +1,10 @@
 {
   "proof": "comment",
   "reviewers": [
-    "400kelvins"
+    {
+      "login": "400kelvins",
+      "id": 190785603
+    }
   ],
   "scopes": {
     "deck": {

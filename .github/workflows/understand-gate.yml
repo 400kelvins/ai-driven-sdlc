@@ -55,7 +55,7 @@ jobs:
           PR: ${{ github.event.pull_request.number }}
         run: |
           gh api --paginate "repos/$REPO/issues/$PR/comments" \
-            --jq '.[] | {login: .user.login, type: .user.type, body: .body} | tojson' > comments.ndjson
+            --jq '.[] | {id: .user.id, login: .user.login, type: .user.type, body: .body} | tojson' > comments.ndjson
       # Main's checker, run against the PR head
       - name: Check every touched scope
         working-directory: head

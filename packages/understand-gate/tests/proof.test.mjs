@@ -7,9 +7,10 @@ import { commentLine, hasCommentProof } from '../src/proof.mjs'
 import { parseConfig } from '../src/scopes.mjs'
 import { DECK_AND_PACKAGE, tempRepo, ug } from './helpers.mjs'
 
-const WITH_PROOF = { ...DECK_AND_PACKAGE, proof: 'comment', reviewers: ['Presenter'] }
+const PRESENTER = { login: 'Presenter', id: 7 }
+const WITH_PROOF = { ...DECK_AND_PACKAGE, proof: 'comment', reviewers: [PRESENTER] }
 const FILES = { 'slides.md': '# Talk', 'pages/a.md': '# A', 'packages/understand-gate/a.mjs': 'export {}' }
-const c = (login, body, type = 'User') => ({ login, type, body })
+const c = (login, body, type = 'User', id = login.toLowerCase() === 'presenter' ? 7 : 99) => ({ id, login, type, body })
 
 test('the comment line names the scope and the fingerprint', () => {
   assert.equal(commentLine('deck', '0123456789abcdef'), '/understand-gate yes deck 0123456789abcdef')
@@ -17,14 +18,21 @@ test('the comment line names the scope and the fingerprint', () => {
 
 test('a listed reviewer comment with the exact line is proof', () => {
   const line = commentLine('deck', 'aaaa')
-  assert.ok(hasCommentProof([c('presenter', line)], ['Presenter'], 'deck', 'aaaa'), 'logins compare without case')
-  assert.ok(hasCommentProof([c('Presenter', `Reviewed it.\r\n${line}\nThanks`)], ['Presenter'], 'deck', 'aaaa'), 'a line inside a longer comment')
-  assert.ok(hasCommentProof([c('Presenter', `  ${line}  `)], ['Presenter'], 'deck', 'aaaa'), 'surrounding spaces')
+  assert.ok(hasCommentProof([c('Presenter', line)], [PRESENTER], 'deck', 'aaaa'))
+  assert.ok(hasCommentProof([c('Presenter', `Reviewed it.\r\n${line}\nThanks`)], [PRESENTER], 'deck', 'aaaa'), 'a line inside a longer comment')
+  assert.ok(hasCommentProof([c('Presenter', `  ${line}  `)], [PRESENTER], 'deck', 'aaaa'), 'surrounding spaces')
+  assert.ok(hasCommentProof([c('presenter-renamed', line, 'User', 7)], [PRESENTER], 'deck', 'aaaa'), 'the same account after a rename')
+})
+
+test('a re-claimed login is not the reviewer: ids decide, not names', () => {
+  const line = commentLine('deck', 'aaaa')
+  assert.ok(!hasCommentProof([c('Presenter', line, 'User', 1234)], [PRESENTER], 'deck', 'aaaa'))
+  assert.ok(!hasCommentProof([{ login: 'Presenter', type: 'User', body: line }], [PRESENTER], 'deck', 'aaaa'), 'no id')
 })
 
 test('anything else is not proof', () => {
   const line = commentLine('deck', 'aaaa')
-  const reviewers = ['Presenter']
+  const reviewers = [PRESENTER]
   assert.ok(!hasCommentProof([], reviewers, 'deck', 'aaaa'), 'no comment')
   assert.ok(!hasCommentProof([c('Presenter', commentLine('deck', 'bbbb'))], reviewers, 'deck', 'aaaa'), 'other fingerprint')
   assert.ok(!hasCommentProof([c('Presenter', commentLine('package', 'aaaa'))], reviewers, 'deck', 'aaaa'), 'other scope')
@@ -37,7 +45,9 @@ test('anything else is not proof', () => {
 test('config: comment proof needs a reviewer list; unknown modes are refused', () => {
   assert.equal(parseConfig(JSON.stringify(WITH_PROOF)).proof, 'comment')
   assert.throws(() => parseConfig(JSON.stringify({ ...WITH_PROOF, reviewers: [] })), /reviewers/)
-  assert.throws(() => parseConfig(JSON.stringify({ ...WITH_PROOF, reviewers: [''] })), /reviewers/)
+  assert.throws(() => parseConfig(JSON.stringify({ ...WITH_PROOF, reviewers: ['Presenter'] })), /reviewers/)
+  assert.throws(() => parseConfig(JSON.stringify({ ...WITH_PROOF, reviewers: [{ login: 'Presenter' }] })), /reviewers/)
+  assert.throws(() => parseConfig(JSON.stringify({ ...WITH_PROOF, reviewers: [{ login: 'Presenter', id: '7' }] })), /reviewers/)
   assert.throws(() => parseConfig(JSON.stringify({ ...DECK_AND_PACKAGE, proof: 'vibes' })), /proof/)
 })
 

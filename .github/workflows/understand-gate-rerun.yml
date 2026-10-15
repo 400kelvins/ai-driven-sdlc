@@ -1,11 +1,13 @@
-# Posting `/understand-gate yes <scope> <fingerprint>` on a pull request re-runs its understand-gate
-# check, so the reviewer never has to push again (spec 014). Runs from main (issue_comment always does),
-# checks out nothing, and runs no pull request code: it only asks GitHub to re-run an existing run.
+# Posting, editing, or deleting a `/understand-gate yes <scope> <fingerprint>` comment re-runs the pull
+# request's understand-gate check, so the reviewer never has to push again (spec 014). Runs from main
+# (issue_comment always does), checks out nothing, and runs no pull request code: it only asks GitHub to
+# re-run an existing run. A re-run reuses that run's event, so a config change on main applies from the
+# pull request's next push.
 name: understand-gate re-run
 
 on:
   issue_comment:
-    types: [created, edited]
+    types: [created, edited, deleted]
 
 permissions:
   actions: write
@@ -14,10 +16,15 @@ permissions:
 
 jobs:
   rerun:
-    # Advisory helper, not a required check, so skipping it for other comments is safe
-    if: github.event.issue.pull_request && contains(github.event.comment.body, '/understand-gate yes')
+    # Advisory helper, not a required check, so skipping it is safe. Only people with write access can
+    # trigger it, and only when a yes line appears, changes, or disappears.
+    if: >-
+      github.event.issue.pull_request &&
+      contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association) &&
+      (contains(github.event.comment.body, '/understand-gate yes') ||
+       contains(github.event.changes.body.from, '/understand-gate yes'))
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 15
     steps:
       - name: Re-run the latest understand-gate check for this pull request
         env:
@@ -25,10 +32,12 @@ jobs:
           REPO: ${{ github.repository }}
           PR: ${{ github.event.issue.number }}
         run: |
-          run=$(gh api "repos/$REPO/actions/workflows/understand-gate.yml/runs?event=pull_request_target&per_page=50" \
-            --jq "[.workflow_runs[] | select(any(.pull_requests[]; .number == $PR))][0].id // empty")
+          run=$(gh api --paginate "repos/$REPO/actions/workflows/understand-gate.yml/runs?event=pull_request_target&per_page=100" \
+            --jq ".workflow_runs[] | select(any(.pull_requests[]; .number == $PR)) | .id" | head -n 1)
           if [ -z "$run" ]; then
-            echo "No understand-gate run found for pull request #$PR"
-            exit 0
+            echo "::error::No understand-gate run found for pull request #$PR; push a commit to start one."
+            exit 1
           fi
+          # A run still in progress cannot be re-run, and it may have read the comments before this one
+          gh run watch "$run" --repo "$REPO" > /dev/null || true
           gh run rerun "$run" --repo "$REPO"
