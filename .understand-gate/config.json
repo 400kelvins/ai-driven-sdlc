@@ -29,7 +29,8 @@
     },
     "package": {
       "include": [
-        "packages/understand-gate/**"
+        "packages/understand-gate/**",
+        "packages/read-listen-see/**"
       ],
       "exclude": []
     }
