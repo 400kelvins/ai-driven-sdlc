@@ -20,6 +20,10 @@
   "bin": {
     "understand-gate": "bin/understand-gate.mjs"
   },
+  "exports": {
+    "./package.json": "./package.json",
+    "./bin/understand-gate.mjs": "./bin/understand-gate.mjs"
+  },
   "files": [
     "bin",
     "src",

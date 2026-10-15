@@ -116,6 +116,7 @@ test('tag refuses when versions are out of step, or the tag exists', () => {
 
   const t = monorepo()
   packageYes(t)
+  t.git('push', '-q', 'origin', 'main')
   t.git('tag', 'understand-gate@0.0.0')
   assert.match(release(t.dir, 'tag').stderr, /already exists/)
 })
@@ -123,6 +124,7 @@ test('tag refuses when versions are out of step, or the tag exists', () => {
 test('tag refuses when the package tests fail', () => {
   const r = monorepo({ testBody: "import { test } from 'node:test'\ntest('bad', () => { throw new Error('x') })\n" })
   packageYes(r)
+  r.git('push', '-q', 'origin', 'main')
   const out = release(r.dir, 'tag')
   assert.equal(out.status, 1)
   assert.match(out.stderr, /tests failed/)
@@ -131,6 +133,7 @@ test('tag refuses when the package tests fail', () => {
 test('tag creates the tag, lists the files, prints the publish commands, and stops', () => {
   const r = monorepo()
   packageYes(r)
+  r.git('push', '-q', 'origin', 'main')
   const out = release(r.dir, 'tag')
   assert.equal(out.status, 0, out.stderr)
   assert.equal(r.git('tag', '-l').trim(), 'understand-gate@0.0.0')
@@ -144,6 +147,37 @@ test('tag creates the tag, lists the files, prints the publish commands, and sto
 
 test('the release script never publishes or pushes', () => {
   const source = readFileSync(SCRIPT, 'utf8')
-  const calls = [...source.matchAll(/(?:run|spawnSync|execFileSync)\(([^)]*)\)/g)].map((m) => m[1]).join('\n')
+  const calls = [...source.matchAll(/(?:git|run|spawnSync|execFileSync)\(([^)]*)\)/g)].map((m) => m[1]).join('\n')
+  assert.ok(calls.includes("'tag'"), 'the pattern sees the git helper')
   assert.doesNotMatch(calls, /'publish'|"publish"|'push'|"push"/)
+})
+
+test('prepare refuses a version that is not plain major.minor.patch', () => {
+  const r = monorepo()
+  r.write({ 'packages/understand-gate/package.json': { name: 'understand-gate', version: '1.0.0-rc.1', files: ['bin'] } })
+  r.git('commit', '-qam', 'rc')
+  r.git('push', '-q', 'origin', 'main')
+  const out = release(r.dir, 'prepare', 'patch')
+  assert.equal(out.status, 1)
+  assert.match(out.stderr, /not plain major\.minor\.patch/)
+  assert.equal(r.git('rev-parse', '--abbrev-ref', 'HEAD').trim(), 'main')
+  assert.equal(r.git('status', '--porcelain'), '')
+})
+
+test('tag refuses local commits that are not on origin', () => {
+  const r = monorepo()
+  packageYes(r)
+  const out = release(r.dir, 'tag')
+  assert.equal(out.status, 1)
+  assert.match(out.stderr, /origin\/main/)
+})
+
+test('tag refuses a version already tagged on origin only', () => {
+  const r = monorepo()
+  packageYes(r)
+  r.git('push', '-q', 'origin', 'main')
+  r.git('tag', 'understand-gate@0.0.0')
+  r.git('push', '-q', 'origin', 'understand-gate@0.0.0')
+  r.git('tag', '-d', 'understand-gate@0.0.0')
+  assert.match(release(r.dir, 'tag').stderr, /already exists on origin/)
 })

@@ -43,32 +43,52 @@ function onCleanMain(root) {
   if (git(root, 'status', '--porcelain')) throw new Refused('commit or stash uncommitted changes first')
 }
 
-export function bump(version, word) {
+function bump(version, word) {
+  // Plain x.y.z only: Number('0-rc') is NaN, and a build suffix would be silently dropped
+  if (!/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/.test(version)) {
+    throw new Refused(`version ${version} is not plain major.minor.patch; set it by hand first`)
+  }
   const [major, minor, patch] = version.split('.').map(Number)
   if (word === 'major') return `${major + 1}.0.0`
   if (word === 'minor') return `${major}.${minor + 1}.0`
   return `${major}.${minor}.${patch + 1}`
 }
 
-function prepare(root, word) {
-  if (!BUMPS.includes(word)) throw new Usage(`prepare needs patch, minor, or major`)
-  onCleanMain(root)
+/** Fails unless HEAD is exactly origin/main, so nothing unreviewed is released. */
+function matchesOrigin(root) {
   git(root, 'fetch', '-q', 'origin', 'main')
   if (git(root, 'rev-parse', 'HEAD') !== git(root, 'rev-parse', 'origin/main')) {
     throw new Refused('main does not match origin/main; pull or push first')
   }
+}
+
+function prepare(root, word) {
+  if (!BUMPS.includes(word)) throw new Usage(`prepare needs patch, minor, or major`)
+  onCleanMain(root)
+  matchesOrigin(root)
   const main = readJson(root, MAIN_PKG)
   const alias = readJson(root, ALIAS_PKG)
   const version = bump(main.version, word)
-  git(root, 'switch', '-q', '-c', `release/understand-gate-${version}`)
+  const LOCK = 'package-lock.json'
+  const hasLock = existsSync(join(root, LOCK))
+  const before = Object.fromEntries([MAIN_PKG, ALIAS_PKG, ...(hasLock ? [LOCK] : [])].map((p) => [p, readFileSync(join(root, p), 'utf8')]))
+  // Edit on main's working tree first; only a complete edit moves to the new branch
   writeJson(root, MAIN_PKG, { ...main, version })
   writeJson(root, ALIAS_PKG, { ...alias, version, dependencies: { ...alias.dependencies, 'understand-gate': version } })
-  // Workspace versions are recorded in the lockfile too
-  if (existsSync(join(root, 'package-lock.json'))) {
-    const lock = run(root, 'npm', ['install', '--package-lock-only', '--ignore-scripts', '--no-audit', '--no-fund'])
-    if (lock.status !== 0) throw new Refused('npm could not update package-lock.json')
+  if (hasLock) {
+    // Workspace versions are recorded in the lockfile too
+    const lock = spawnSync('npm', ['install', '--package-lock-only', '--prefer-offline', '--ignore-scripts', '--no-audit', '--no-fund'], {
+      cwd: root,
+      encoding: 'utf8',
+      timeout: 120_000,
+    })
+    if (lock.status !== 0) {
+      for (const [p, text] of Object.entries(before)) writeFileSync(join(root, p), text)
+      throw new Refused('npm could not update package-lock.json (it may need the network); nothing was changed')
+    }
   }
-  git(root, 'add', MAIN_PKG, ALIAS_PKG, ...(existsSync(join(root, 'package-lock.json')) ? ['package-lock.json'] : []))
+  git(root, 'switch', '-q', '-c', `release/understand-gate-${version}`)
+  git(root, 'add', ...Object.keys(before))
   git(root, 'commit', '-q', '-m', `release: understand-gate@${version}`)
   console.log(`Branch release/understand-gate-${version} is ready. Open a pull request; after it merges, run: npm run release -w understand-gate -- tag`)
 }
@@ -80,8 +100,11 @@ function tag(root) {
   if (alias.version !== version || alias.dependencies?.['understand-gate'] !== version) {
     throw new Refused(`versions are not in step: understand-gate ${version}, read-listen-see ${alias.version} depending on ${alias.dependencies?.['understand-gate']}`)
   }
+  // Only what was merged on GitHub gets tagged: no local-only commits
+  matchesOrigin(root)
   const name = `understand-gate@${version}`
   if (git(root, 'tag', '-l', name)) throw new Refused(`tag ${name} already exists`)
+  if (git(root, 'ls-remote', '--tags', 'origin', `refs/tags/${name}`)) throw new Refused(`tag ${name} already exists on origin`)
 
   // Explicit files: `node --test <dir>` runs nothing, and test globs need Node 21
   const dir = 'packages/understand-gate/tests'
@@ -92,6 +115,8 @@ function tag(root) {
   const tests = spawnSync(process.execPath, ['--test', ...testFiles], { cwd: root, encoding: 'utf8', env })
   if (tests.status !== 0) throw new Refused('package tests failed; run them with: npm test -w understand-gate')
 
+  // On main a ledger yes only arrives through a merged pull request, whose merge needed the reviewer's
+  // comment (understand-gate check), so the ledger alone is checked here
   const { scopes } = loadConfig(root)
   const result = approval(readLedger(root), 'package', fingerprint(scopes.package, { cwd: root }))
   if (!result.ok) throw new Refused(`no package review yes for this code: ${result.reason}`)
