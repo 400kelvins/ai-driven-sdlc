@@ -1,7 +1,9 @@
 {
   "scopes": {
     "deck": {
-      "include": ["**"],
+      "include": [
+        "**"
+      ],
       "exclude": [
         "packages/**",
         "_bmad-output/**",
@@ -19,7 +21,9 @@
       ]
     },
     "package": {
-      "include": ["packages/understand-gate/**"],
+      "include": [
+        "packages/nothing/**"
+      ],
       "exclude": []
     }
   }

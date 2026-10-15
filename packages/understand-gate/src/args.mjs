@@ -10,3 +10,5 @@ export function parseArgs(argv) {
   }
   return out
 }
+
+// throwaway: proves a branch cannot shrink its own scope (story 2.3 T013)
