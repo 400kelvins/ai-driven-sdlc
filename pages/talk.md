@@ -521,6 +521,16 @@ Pick one Story next week. Speak it, spec it, and stop it at three gates: plan, c
 -->
 
 ---
+
+# Thank you
+
+<div class="mt-12 text-3xl text-center">Say it. See it. Ship it. Now go build yours.</div>
+
+<!--
+Thank you for staying with me. Everything you saw today started as a sentence I spoke out loud. Now it is your turn to build yours.
+-->
+
+---
 layout: center
 ---
 
