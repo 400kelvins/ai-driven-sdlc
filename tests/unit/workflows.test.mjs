@@ -54,11 +54,13 @@ test('understand-gate runs from main: pull_request_target, read-only, and the PR
   assert.deepEqual(jobs(gate), ['understand-gate'])
   assert.match(gate, /^permissions:\n {2}contents: read\n\n/m)
   assert.doesNotMatch(gate, /permissions:[\s\S]*write/)
-  assert.match(gate, /if: github\.event\.pull_request\.head\.repo\.full_name == github\.repository/)
+  // A skipped required check counts as passing, so the job must run and fail for forks
+  assert.doesNotMatch(gate, /^ {4}if:/m)
+  assert.match(gate, /if \[ "\$HEAD_REPO" != "\$REPO" \]; then[\s\S]*?exit 1/)
   assert.match(gate, /ref: \$\{\{ github\.event\.pull_request\.base\.sha \}\}\n\s+path: base/)
   assert.match(gate, /ref: \$\{\{ github\.event\.pull_request\.head\.sha \}\}\n\s+path: head\n\s+fetch-depth: 0/)
   const runs = [...gate.matchAll(/^\s+run: (.*)$/gm)].map((m) => m[1])
-  assert.deepEqual(runs, ['node ../base/packages/understand-gate/bin/understand-gate.mjs check --base "$BASE_SHA"'])
+  assert.deepEqual(runs, ['|', 'node ../base/packages/understand-gate/bin/understand-gate.mjs check --base "$BASE_SHA"'])
   assert.doesNotMatch(gate, /npm (ci|install|run)/)
 })
 

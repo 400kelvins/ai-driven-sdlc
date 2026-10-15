@@ -78,3 +78,13 @@ test('a bad answer writes neither ledger', () => {
   assert.ok(!existsSync(join(dir, OLD_LEDGER)))
   assert.ok(!existsSync(join(dir, NEW_LEDGER)))
 })
+
+test('an answer only understand-gate refuses writes neither ledger', () => {
+  for (const extra of [['--confidence', '9'], ['--attempts', '0'], ['--first-try', 'perhaps']]) {
+    const dir = repo({ 'slides.md': '# edited' })
+    const out = record(dir, ...extra)
+    assert.notEqual(out.status, 0, extra.join(' '))
+    assert.ok(!existsSync(join(dir, OLD_LEDGER)), extra.join(' '))
+    assert.ok(!existsSync(join(dir, NEW_LEDGER)), extra.join(' '))
+  }
+})

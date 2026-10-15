@@ -22,6 +22,15 @@ function main(argv) {
   if (touched.status !== 0) return touched.status ?? 1
   const scopes = touched.stdout.split('\n').filter(Boolean)
 
+  const forwarded = []
+  for (let i = 0; i < argv.length; i++) {
+    if (PASS.includes(argv[i].replace(/^--/, '')) && argv[i + 1] !== undefined) forwarded.push(argv[i], argv[++i])
+  }
+  const ug = (...more) => run(UG, ['record', '--scope', scopes.join(','), ...forwarded, ...more]).status ?? 1
+
+  // Check the understand-gate answer before writing anything, so a refusal leaves no half-written record
+  if (scopes.length && ug('--dry-run') !== 0) return 1
+
   const old = run(OLD, ['record', ...argv])
   if (old.status !== 0) return old.status ?? 1
 
@@ -29,11 +38,7 @@ function main(argv) {
     console.log('understand-gate: no scope touched, nothing to record')
     return 0
   }
-  const forwarded = []
-  for (let i = 0; i < argv.length; i++) {
-    if (PASS.includes(argv[i].replace(/^--/, '')) && argv[i + 1] !== undefined) forwarded.push(argv[i], argv[++i])
-  }
-  return run(UG, ['record', '--scope', scopes.join(','), ...forwarded]).status ?? 1
+  return ug()
 }
 
 process.exitCode = main(process.argv.slice(2))

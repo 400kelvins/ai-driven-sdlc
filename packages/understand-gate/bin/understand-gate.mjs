@@ -3,7 +3,7 @@
 //
 //   understand-gate fingerprint --scope <name>
 //   understand-gate record --scope <a,b> --stage plan|implement|review --story <id> --decision yes|no
-//                          [--attempts <n>] [--first-try yes|no] [--confidence 1-5] [--note "<text>"]
+//                          [--attempts <n>] [--first-try yes|no] [--confidence 1-5] [--note "<text>"] [--dry-run]
 //   understand-gate check --base <ref> | --all
 //   understand-gate touched --base <ref>       # touched scope names, one per line
 //   understand-gate stats
@@ -32,12 +32,14 @@ function pickScopes(scopes, names) {
  * Scopes a branch touched since it left `baseRef`, judged by the config at the merge base.
  * A branch must not judge itself: scopes and earlier decisions come from where it started (AD-2, AD-4).
  */
-function touchedSince(root, config, baseRef) {
+function touchedSince(root, baseRef) {
   // A shallow clone can hide the real merge base, and with it the files a branch changed
   if (isShallow(root)) throw new Error('shallow clone: fetch full history (actions/checkout fetch-depth: 0) before using --base')
   const base = git(root, 'merge-base', baseRef, 'HEAD').trim()
   const baseConfig = showAt(root, base, CONFIG)
-  const scopes = baseConfig === null ? config.scopes : parseConfig(baseConfig, `${CONFIG} at ${baseRef}`).scopes
+  // Without a config at the base, the branch would choose its own scopes; refuse instead
+  if (baseConfig === null) throw new Error(`${CONFIG} not found at the merge base with ${baseRef}; merge the config first`)
+  const scopes = parseConfig(baseConfig, `${CONFIG} at ${baseRef}`).scopes
   assertAppendOnly(root, showAt(root, base, LEDGER))
   const changed = changedSince(root, base)
   return { scopes, names: Object.keys(scopes).filter((n) => changed.some((path) => inScope(path, scopes[n]))) }
@@ -63,13 +65,14 @@ const COMMANDS = {
     if (dirty.length) throw new Error(`Commit these files before recording, so CI sees the same code: ${dirty.join(', ')}`)
     const fingerprints = Object.fromEntries(names.map((n) => [n, fingerprint(scopes[n], { cwd: root })]))
     const lines = decisionLines(answer, fingerprints)
+    if (args['dry-run'] === true) return
     appendLines(root, lines)
     for (const l of lines) console.log(`Recorded ${l.stage} ${l.decision} for ${l.scope}, story ${l.story} (${l.fingerprint})`)
   },
 
   touched(root, config, args) {
     if (typeof args.base !== 'string') throw new Usage()
-    const { names } = touchedSince(root, config, args.base)
+    const { names } = touchedSince(root, args.base)
     if (names.length) console.log(names.join('\n'))
   },
 
@@ -79,7 +82,7 @@ const COMMANDS = {
     let { scopes } = config
     let names = Object.keys(scopes)
     if (!all) {
-      ;({ scopes, names } = touchedSince(root, config, args.base))
+      ;({ scopes, names } = touchedSince(root, args.base))
       if (!names.length) {
         console.log(`Human review gate passed: no scope touched since ${args.base}`)
         return

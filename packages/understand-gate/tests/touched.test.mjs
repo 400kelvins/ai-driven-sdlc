@@ -37,3 +37,19 @@ test('touched without --base is a usage error', () => {
   const { dir } = branch({ 'pages/a.md': '# edited' })
   assert.equal(ug(dir, 'touched').status, 2)
 })
+
+test('a branch from before the config existed is refused, not judged by its own config', () => {
+  const repo = tempRepo({ 'slides.md': '# Talk' })
+  repo.git('branch', '-M', 'main')
+  repo.git('rm', '-q', '.understand-gate/config.json')
+  repo.git('commit', '-qm', 'no config yet')
+  repo.git('switch', '-q', '-c', 'feature')
+  repo.write({ '.understand-gate/config.json': '{"scopes":{"docs":{"include":["specs/**"]}}}', 'slides.md': '# edited' })
+  repo.git('add', '-A')
+  repo.git('commit', '-qm', 'own config')
+  for (const cmd of [['touched', '--base', 'main'], ['check', '--base', 'main']]) {
+    const out = ug(repo.dir, ...cmd)
+    assert.equal(out.status, 1, cmd[0])
+    assert.match(out.stderr, /not found at the merge base/)
+  }
+})

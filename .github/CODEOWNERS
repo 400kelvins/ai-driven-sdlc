@@ -5,3 +5,6 @@
 /packages/understand-gate/   @400kelvins
 /scripts/gate.mjs            @400kelvins
 /scripts/gate-record.mjs     @400kelvins
+/package.json                @400kelvins
+/tests/                      @400kelvins
+/.specify/                   @400kelvins

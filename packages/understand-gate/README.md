@@ -72,3 +72,10 @@ main's copies; its edits apply only after it merges, which needs a yes for the s
 
 `understand-gate touched --base <ref>` prints the scopes a branch touched, one per line, so CI can
 run only the tests for those scopes.
+
+`verify` is not a trust boundary: it runs from the pull request's own workflow, so a pull request can
+change which tests it runs. The gate is `understand-gate`. A scope config must already be on `main`
+before `check --base` judges a branch; without one, the check refuses.
+
+Known limits until later stories: a yes in the ledger is not yet proven to come from a human (Story
+2.4), and a pull request could add its own job named `understand-gate`.
