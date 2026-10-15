@@ -187,7 +187,7 @@ If anyone, human or AI, changes a shipped file after my yes, our ship command re
 <Flow :steps="['PR', { label: 'Tests 🔒', kind: 'gate' }, 'AI review 💬<br/><small>diagram first</small>', 'Slide changes 💬<br/><small>before · after</small>', { label: 'My yes 🔒', kind: 'gate' }, 'Merge<br/><small>by me</small>']" />
 </div>
 
-<div class="mt-8 text-2xl text-center"><b>Robots advise. Tests and I decide.</b></div>
+<div class="mt-8 text-2xl text-center"><b>Robots only advise. Tests and I decide.</b></div>
 
 <div class="mt-4 text-center op-70">🔒 required check · 💬 advisory comment · the AI never merges</div>
 
