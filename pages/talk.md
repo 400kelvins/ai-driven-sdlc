@@ -290,6 +290,73 @@ The AI agent's verification step caught it before I ever noticed. That's the val
 -->
 
 ---
+
+# We've feared this before
+
+<div class="grid grid-cols-5 gap-3 mt-4 text-sm text-center items-start">
+<div>
+<img src="/history/luddites-1812.jpg" alt="The Leader of the Luddites, engraving, 1812" class="h-40 mx-auto rounded object-cover" />
+<div class="mt-2"><b>1812 · Looms</b><br/>Weavers smashed the machines.<br/><span class="op-70">Factories, mechanics, engineers followed.</span></div>
+</div>
+<div>
+<img src="/history/switchboard-1911.jpg" alt="A telephone operator at a switchboard, 1911" class="h-40 mx-auto rounded object-cover" />
+<div class="mt-2"><b>1911 · Telephones</b><br/>Operators connected every call.<br/><span class="op-70">Automatic switching came. The network grew.</span></div>
+</div>
+<div>
+<img src="/history/eniac-1946.jpg" alt="Two women operating the ENIAC computer, 1946" class="h-40 mx-auto rounded object-cover" />
+<div class="mt-2"><b>1946 · Computers</b><br/>"Computers" was a job title.<br/><span class="op-70">These women became the first programmers.</span></div>
+</div>
+<div>
+<div class="h-40 flex items-center justify-center rounded border-2 border-indigo-400/60 bg-indigo-500/10 text-4xl">🏧</div>
+<div class="mt-2"><b>1985–2002 · ATMs</b><br/>60,000 → 352,000 machines.<br/><span class="op-70">Bank tellers: 500,000 → 527,000.</span></div>
+</div>
+<div>
+<div class="h-40 flex items-center justify-center rounded border-2 border-amber-500 bg-amber-500/15 text-4xl">🤖</div>
+<div class="mt-2"><b>Today · AI</b><br/>AI writes the code.<br/><span class="op-70">Someone still has to understand it.</span></div>
+</div>
+</div>
+
+<div class="mt-4 text-xs op-60 text-center">Photos: public domain, via Wikimedia Commons (1812 engraving; Library of Congress, 1911; U.S. Army Photo, 1946). ATM figures: James Bessen, IMF Finance &amp; Development, 2015.</div>
+
+<!--
+Every generation has had this fear.
+
+In 1812, weavers smashed the machines that were taking their work. The machines came anyway, and so did factories, mechanics, and engineers.
+
+In 1911, a person connected every phone call. Automatic switching ended that job, and the phone network grew into whole industries.
+
+In 1946, "computer" was a job title. The women who operated ENIAC became the first programmers. A job that didn't exist before.
+
+When ATMs spread, the number of machines went from sixty thousand to three hundred and fifty thousand. The number of bank tellers went up, not down.
+
+Today it's AI writing code. And someone still has to understand it.
+-->
+
+---
+
+# Only humans replace humans
+
+<div class="grid grid-cols-3 gap-6 mt-10 text-center">
+  <div class="p-5 rounded-lg border-2 border-indigo-400/60 bg-indigo-500/10"><div class="text-4xl font-bold">~60%</div><div class="mt-2">of US jobs in 2018 were in job types that didn't exist in 1940</div></div>
+  <div class="p-5 rounded-lg border-2 border-indigo-400/60 bg-indigo-500/10"><div class="text-4xl">⚙️ → ⚙️⚙️⚙️</div><div class="mt-2">More moving parts<br/>need more people</div></div>
+  <div class="p-5 rounded-lg border-2 border-amber-500 bg-amber-500/15"><div class="text-4xl">💪</div><div class="mt-2">Effort and action<br/>are how we stay</div></div>
+</div>
+
+<div class="mt-10 text-2xl text-center">AI won't replace you. A person who learns to use it will.</div>
+
+<div class="mt-6 text-xs op-60 text-center">Autor, Chin, Salomons &amp; Seegmiller, "New Frontiers: The Origins and Content of New Work, 1940–2018", NBER Working Paper 30389, 2022.</div>
+
+<!--
+So here is what I believe.
+
+Most of the jobs in America today didn't exist in 1940. About sixty percent of them. Technology takes tasks away, and it adds new work.
+
+This pipeline is a small example. AI writes the code, and now there are specs, gates, reviews, and deploys. More moving parts, and every one of them needs a person who understands it.
+
+Only humans replace humans. A person who learns to use AI will replace one who doesn't. That takes effort and action. That's how we stay.
+-->
+
+---
 layout: center
 ---
 

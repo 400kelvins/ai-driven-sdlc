@@ -6,7 +6,7 @@ info: |
   Built entirely by AI. Spec: specs/001-deck-scaffold.
 fonts:
   provider: none
-  sans: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif'
+  sans: '"Fjord One", Georgia, serif'
   mono: 'ui-monospace, "SF Mono", Menlo, monospace'
 transition: slide-left
 duration: 20min

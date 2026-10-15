@@ -20,6 +20,25 @@ Today I'll show you what happens when every one of those steps is handed to AI, 
 -->
 
 ---
+
+# Why I built it this way
+
+<div class="mt-12 text-3xl leading-relaxed">
+I work in <b>fintech</b>.<br/>
+I can't show you our code.
+</div>
+
+<div class="mt-10 text-2xl op-80">So I built the same process in the open, on this deck.</div>
+
+<!--
+A quick word on why this talk looks the way it does.
+
+I work in fintech. I can't show you our code, our systems, or our pipelines. That's the job.
+
+So I took the process I designed for architecting the AI-driven SDLC at work, and I ran it in the open, on this deck. Every slide you'll see went through the same steps: spoken requirements, specs, gates, reviews, and deploys.
+-->
+
+---
 layout: fact
 ---
 
