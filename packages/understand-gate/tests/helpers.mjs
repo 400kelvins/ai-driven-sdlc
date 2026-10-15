@@ -1,7 +1,7 @@
 import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
-import { execFileSync } from 'node:child_process'
+import { execFileSync, spawnSync } from 'node:child_process'
 
 export const DECK_AND_PACKAGE = {
   scopes: {
@@ -32,4 +32,11 @@ function write(dir, files) {
     mkdirSync(dirname(join(dir, path)), { recursive: true })
     writeFileSync(join(dir, path), content)
   }
+}
+
+const BIN = new URL('../bin/understand-gate.mjs', import.meta.url).pathname
+
+/** Runs the CLI in `cwd`; returns { status, stdout, stderr }. */
+export function ug(cwd, ...args) {
+  return spawnSync(process.execPath, [BIN, ...args], { cwd, encoding: 'utf8' })
 }

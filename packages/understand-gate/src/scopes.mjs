@@ -4,6 +4,7 @@
 //   an exclude starting with ! re-includes; the last matching exclude wins.
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { LEDGER } from './ledger.mjs'
 
 export const CONFIG = '.understand-gate/config.json'
 
@@ -35,6 +36,8 @@ export function matches(pattern, path) {
 }
 
 export function inScope(path, scope) {
+  // The ledger records decisions about scopes, so it can never be part of one (AD-3)
+  if (path === LEDGER) return false
   if (!scope.include.some((p) => matches(p, path))) return false
   let excluded = false
   for (const p of scope.exclude ?? []) {
@@ -57,22 +60,33 @@ function patternProblem(pattern) {
 
 /** Reads and checks the config; throws an Error with a one-line message. */
 export function loadConfig(cwd = process.cwd()) {
+  let text
+  try {
+    text = readFileSync(join(cwd, CONFIG), 'utf8')
+  } catch (err) {
+    throw new Error(`${CONFIG}: ${err.code === 'ENOENT' ? 'not found' : err.message}`)
+  }
+  return parseConfig(text)
+}
+
+/** Checks config text, from the working tree or from another commit. */
+export function parseConfig(text, where = CONFIG) {
   let config
   try {
-    config = JSON.parse(readFileSync(join(cwd, CONFIG), 'utf8'))
-  } catch (err) {
-    throw new Error(`${CONFIG}: ${err.code === 'ENOENT' ? 'not found' : 'not valid JSON'}`)
+    config = JSON.parse(text)
+  } catch {
+    throw new Error(`${where}: not valid JSON`)
   }
   const scopes = config?.scopes
   if (!scopes || typeof scopes !== 'object' || !Object.keys(scopes).length) {
-    throw new Error(`${CONFIG}: needs at least one scope under "scopes"`)
+    throw new Error(`${where}: needs at least one scope under "scopes"`)
   }
   for (const [name, scope] of Object.entries(scopes)) {
     const valid = Array.isArray(scope?.include) && (scope.exclude === undefined || Array.isArray(scope.exclude))
-    if (!valid) throw new Error(`${CONFIG}: scope "${name}" needs an "include" list and an optional "exclude" list`)
+    if (!valid) throw new Error(`${where}: scope "${name}" needs an "include" list and an optional "exclude" list`)
     for (const pattern of [...scope.include, ...(scope.exclude ?? [])]) {
       const problem = patternProblem(pattern)
-      if (problem) throw new Error(`${CONFIG}: scope "${name}" pattern ${JSON.stringify(pattern)} ${problem}`)
+      if (problem) throw new Error(`${where}: scope "${name}" pattern ${JSON.stringify(pattern)} ${problem}`)
     }
   }
   return config
