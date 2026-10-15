@@ -1,10 +1,14 @@
 ---
-layout: center
+layout: full
 ---
+
+<div class="h-full flex flex-col items-center gap-2 p-2">
 
 # Demo: Voice to Production
 
-<DemoVideo />
+<DemoVideo class="flex-1 min-h-0" />
+
+</div>
 
 <!--
 Play the recording. Point out the gates as they appear.

@@ -7,7 +7,8 @@ const failed = ref(false)
 </script>
 
 <template>
-  <div class="w-full flex justify-center">
+  <!-- Sized by the slide, not the viewport: Slidev scales the slide, so vh units overflow it -->
+  <div class="w-full h-full min-h-0 flex justify-center">
     <video
       v-if="!failed"
       data-testid="demo-video"
@@ -15,7 +16,7 @@ const failed = ref(false)
       controls
       preload="metadata"
       playsinline
-      class="max-h-[70vh] rounded shadow-lg"
+      class="h-full max-w-full object-contain rounded shadow-lg"
       @error="failed = true"
     />
     <div
