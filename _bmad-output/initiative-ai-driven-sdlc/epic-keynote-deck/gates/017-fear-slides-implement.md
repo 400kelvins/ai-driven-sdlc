@@ -1,6 +1,6 @@
 # Gate Review Pack — Plan + implement gate (fast track): Story 15, we've feared this before
 
-**Spec**: `specs/017-fear-slides/` · **Issue**: #23 · **Date**: 2026-10-15 · **Decision**: yes (2026-10-15, presenter; fast track; quiz passed first try)
+**Spec**: `specs/017-fear-slides/` · **Issue**: #23 · **Date**: 2026-10-15 · **Decision**: yes (2026-10-15, presenter; fast track; quiz passed first try; review yes)
 
 ## Summary (read aloud)
 
