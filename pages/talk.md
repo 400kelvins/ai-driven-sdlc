@@ -521,6 +521,16 @@ Pick one Story next week. Speak it, spec it, and stop it at three gates: plan, c
 -->
 
 ---
+
+# Thank you!
+
+<div class="mt-12 text-3xl text-center">Questions? Ask me anything.</div>
+
+<!--
+Thank you for staying with me. I'm happy to take any question, about the gates, the costs, or how to start in your own repo.
+-->
+
+---
 layout: center
 ---
 

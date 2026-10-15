@@ -45,3 +45,4 @@
 {"at":"2026-10-15T14:51:24.751Z","stage":"review","story":"demo-video","decision":"no","fingerprint":"43bb77ff8a535b78","commit":"cd0e74b","note":"no, the video is cropped, my demo is at top and at the bottom, full screen should be visible, also don't compress, it goes on big projector"}
 {"at":"2026-10-15T15:01:31.561Z","stage":"review","story":"demo-video","decision":"yes","fingerprint":"f99e881ac0d78e2e","commit":"9a7a4b0"}
 {"at":"2026-10-15T15:19:03.990Z","stage":"review","story":"try-early","decision":"yes","fingerprint":"5257a45ddc03658d","commit":"4ff2e50"}
+{"at":"2026-10-15T16:54:27.590Z","stage":"review","story":"demo-thank-you-questions","decision":"yes","fingerprint":"33f0e4413b928fe9","commit":"b906694","note":"live demo; quiz missed twice (key line)"}
