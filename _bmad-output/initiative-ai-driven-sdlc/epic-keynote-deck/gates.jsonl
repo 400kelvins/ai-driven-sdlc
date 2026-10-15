@@ -22,3 +22,4 @@
 {"at":"2026-10-15T10:10:44.877Z","stage":"plan","story":"2.3","decision":"yes","fingerprint":"1cabec05c32776ea","commit":"ddb1a2c","note":"quiz wrong twice (thought PR's workflow runs), right after the target-branch explanation"}
 {"at":"2026-10-15T10:20:49.276Z","stage":"implement","story":"2.3","decision":"yes","fingerprint":"3b3c6e35598fc6ae","commit":"7b24eca","note":"quiz passed first try"}
 {"at":"2026-10-15T10:29:01.828Z","stage":"review","story":"2.3","decision":"yes","fingerprint":"5f77c0770c4dde78","commit":"b96513c","note":"presenter reviewed PR #15; local AI review: fork skip fixed, self-recorded yes deferred to 2.4, same-name job to rulesets follow-up; quiz right on the third try after GitHub docs quote"}
+{"at":"2026-10-15T10:41:33.726Z","stage":"review","story":"2.3","decision":"yes","fingerprint":"fa98baf89bb74d6e","commit":"e51db65","note":"re-approved after the old gate stopped hashing the understand-gate ledger; quiz passed first try"}

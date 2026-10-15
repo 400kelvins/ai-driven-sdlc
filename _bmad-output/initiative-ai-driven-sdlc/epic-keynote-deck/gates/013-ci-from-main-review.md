@@ -1,6 +1,6 @@
 # Gate Review Pack — Review gate: Story 2.3, CI runs the checker and config from main
 
-**PR**: [#15](https://github.com/400kelvins/ai-driven-sdlc/pull/15) · **Issue**: #14 · **Date**: 2026-10-15 · **Decision**: yes (2026-10-15, presenter reviewed the PR; quiz right on the third try)
+**PR**: [#15](https://github.com/400kelvins/ai-driven-sdlc/pull/15) · **Issue**: #14 · **Date**: 2026-10-15 · **Decision**: yes (2026-10-15, presenter reviewed the PR; quiz right on the third try; re-approved after the ledger fix, quiz first try)
 
 ## Summary (read aloud)
 
